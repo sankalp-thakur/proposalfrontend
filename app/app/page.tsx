@@ -37,7 +37,7 @@ const RunOptimizationPage = () => {
   const fetchFinancialModels = async () => {
     setIsLoadingModels(true);
     try {
-      const response = await fetch('https://proposal.hygenco.in/api/getFinancialModels', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/getFinancialModels`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "app/page.tsx",
   "scripts": {
-    "dev": "next dev -H 0.0.0.0 -p 61907",
-    "build": "next build",
-    "start": "next start -H 0.0.0.0 -p 61907",
+    "dev": "set NODE_ENV=development& next dev -H 0.0.0.0 -p 61907",
+    "build": "set NODE_ENV=production& next build",
+    "start": "set NODE_ENV=production& next start -H 0.0.0.0 -p 61907",
+    "start:dev": "set NODE_ENV=development& next start -H 0.0.0.0 -p 61907",
     "test": "echo \"Error: no test specified\" && exit 1",
     "export": "next build && next export"
   },
@@ -35,7 +36,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.468.0",
-    "next": "^15.1.6",
+    "next": "^15.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-toastify": "^10.0.6",

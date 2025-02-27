@@ -66,7 +66,7 @@ const PastOptimizationsPage = () => {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch('https://proposal.hygenco.in/api/getOptimize', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/getOptimize`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ const PastOptimizationsPage = () => {
 
   const fetchOptimizationDetails = async (operationRunId: string) => {
     try {
-      const response = await fetch(`https://proposal.hygenco.in/api/detailedOptimise/${operationRunId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/detailedOptimise/${operationRunId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ const PastOptimizationsPage = () => {
     try {
       setDownloadingIds(prev => [...prev, operationRunId]);
       
-      const response = await fetch(`https://proposal.hygenco.in/api/downloadExcel/${operationRunId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/downloadExcel/${operationRunId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -353,3 +353,4 @@ const PastOptimizationsPage = () => {
 };
 
 export default withAuth(PastOptimizationsPage);
+//export default PastOptimizationsPage
