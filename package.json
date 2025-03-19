@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "app/page.tsx",
   "scripts": {
-    "dev": "set NODE_ENV=development& next dev -H 0.0.0.0 -p 61907",
-    "build": "set NODE_ENV=production& next build",
-    "start": "set NODE_ENV=production& next start -H 0.0.0.0 -p 61907",
-    "start:dev": "set NODE_ENV=development& next start -H 0.0.0.0 -p 61907",
+    "dev": "NODE_ENV=development next dev -H 0.0.0.0 -p 61907",
+    "build": "NODE_ENV=production next build",
+    "start": "NODE_ENV=production next start -H 0.0.0.0 -p 61907",
+    "start:dev": "NODE_ENV=development next start -H 0.0.0.0 -p 61907",
     "test": "echo \"Error: no test specified\" && exit 1",
     "export": "next build && next export"
   },

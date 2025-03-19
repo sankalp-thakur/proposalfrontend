@@ -102,7 +102,7 @@ const RunOptimizationPage = () => {
       const requestBody = JSON.stringify({ Ui_variables: data })
       console.log("[handleOptimize] Sending POST request to /optimize with body:", requestBody)
 
-      const response = await fetch('/optimize', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/optimize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -493,5 +493,5 @@ const RunOptimizationPage = () => {
   )
 }
 
-export default withAuth(RunOptimizationPage)
-//export default RunOptimizationPage
+//export default withAuth(RunOptimizationPage)
+export default RunOptimizationPage
