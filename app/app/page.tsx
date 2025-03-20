@@ -122,7 +122,11 @@ const RunOptimizationPage = () => {
       const result = await response.json()
       console.log("[handleOptimize] Parsed JSON response:", result)
 
-      if (result.status === 'queued') {
+      if (response.status === 202) {
+        console.log("[handleOptimize] Optimization request accepted successfully.")
+        toast.success(`Optimization started with run id ${result.operation_run_id}`)
+        setActiveTab("results")
+      } else if (result.status === 'queued') {
         console.log("[handleOptimize] Optimization request queued successfully.")
         toast.success("Your request has been queued. Results will be sent to your email address in approximately one hour.")
         setActiveTab("results")
