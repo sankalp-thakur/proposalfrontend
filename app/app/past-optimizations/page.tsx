@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@../../components/ui/popover";
 import { withAuth } from '../../form/authWrapper';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface OptimizationResult {
   created_at: string;
@@ -94,6 +94,11 @@ const PastOptimizationsPage = () => {
     }
   };
 
+  // Auto-fetch optimizations when the component mounts
+  useEffect(() => {
+    fetchOptimizations();
+  }, []);
+
   const fetchOptimizationDetails = async (operationRunId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/detailedOptimise/${operationRunId}`, {
@@ -164,20 +169,21 @@ const PastOptimizationsPage = () => {
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Past Optimizations</h1>
-        <Button 
-          variant="default" 
-          className="bg-[#1A3721] hover:bg-[#2A4731] text-white"
-          onClick={fetchOptimizations}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Fetching...' : 'Fetch Optimizations'}
-        </Button>
+        {isLoading && <div className="text-sm text-gray-500">Loading...</div>}
       </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded relative">
           <strong className="font-bold">Error: </strong>
           <span className="block sm:inline">{error}</span>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="mt-2"
+            onClick={fetchOptimizations}
+          >
+            Try Again
+          </Button>
         </div>
       )}
 

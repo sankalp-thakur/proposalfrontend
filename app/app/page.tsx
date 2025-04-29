@@ -246,180 +246,224 @@ const RunOptimizationPage = () => {
               )}
               <form onSubmit={handleOptimize}>
                 <div className="grid gap-4">
-                  <h3 className="text-lg font-semibold">Assumptions</h3>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="client_h2flowrate" className="col-span-2">Customer required H2 flow rate (NM3/hour):</Label>
-                    <Input id="client_h2flowrate" name="client_h2flowrate" className="col-span-2" defaultValue="0" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="client_h2flowhours" className="col-span-2">Hours of H2 supply at flow rate:</Label>
-                    <Input id="client_h2flowhours" name="client_h2flowhours" className="col-span-2" defaultValue="24" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="supplyPressureVsEL" className="col-span-2">Supply pressure vs. EL (Low/High):</Label>
-                    <Input id="supplyPressureVsEL" name="supplyPressureVsEL" className="col-span-2" defaultValue="High" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="projectLifetime" className="col-span-2">Project contract lifetime (Years):</Label>
-                    <Input id="projectLifetime" name="projectLifetime" className="col-span-2" defaultValue="20" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="contractCurrency" className="col-span-2">Contract pricing currency (USD/INR):</Label>
-                    <Input id="contractCurrency" name="contractCurrency" className="col-span-2" defaultValue="INR" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="o2MarketSellClientOfftake" className="col-span-2">O2 market sell/Client Offtake (Yes/No):</Label>
-                    <Input id="o2MarketSellClientOfftake" name="o2MarketSellClientOfftake" className="col-span-2" defaultValue="Yes" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="o2MarketSellLimit" className="col-span-2">O2 market sell limit (Nm3/month):</Label>
-                    <Input id="o2MarketSellLimit" name="o2MarketSellLimit" className="col-span-2" defaultValue="999999999" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="excessProductionH2Merchant" className="col-span-2">Excess production H2 merchant market sell (Yes/No):</Label>
-                    <Input id="excessProductionH2Merchant" name="excessProductionH2Merchant" className="col-span-2" defaultValue="Yes" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="excessProductionH2MerchantLimit" className="col-span-2">Excess production H2 merchant market sell limit (Nm3/month):</Label>
-                    <Input id="excessProductionH2MerchantLimit" name="excessProductionH2MerchantLimit" className="col-span-2" defaultValue="999999999" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="injectExcessPower" className="col-span-2">Inject excess power to client/grid (Yes/No):</Label>
-                    <Input id="injectExcessPower" name="injectExcessPower" className="col-span-2" defaultValue="Yes" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="drawPowerFromClient" className="col-span-2">Draw power from client/grid (use as battery) (Yes/No):</Label>
-                    <Input id="drawPowerFromClient" name="drawPowerFromClient" className="col-span-2" defaultValue="Yes" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="electrolyzerType" className="col-span-2">Electrolyzer Type (AEC/PEM):</Label>
-                    <Input id="electrolyzerType" name="electrolyzerType" className="col-span-2" defaultValue="AEC" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="electrolyzerstackConversion100Percent" className="col-span-2">Electrolyzer stack conversion (100% flow) (KwH/NM3):</Label>
-                    <Input id="electrolyzerstackConversion100Percent" name="electrolyzerstackConversion100Percent" className="col-span-2" defaultValue="4.6350" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="electrolyzerstackConversionMinTurndown" className="col-span-2">Electrolyzer stack conversion (min turndown flow) (KwH/NM3):</Label>
-                    <Input id="electrolyzerstackConversionMinTurndown" name="electrolyzerstackConversionMinTurndown" className="col-span-2" defaultValue="3.744" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="stackMinTurndownratio" className="col-span-2">Stack min turndown ratio %:</Label>
-                    <Input id="stackMinTurndownratio" name="stackMinTurndownratio" className="col-span-2" defaultValue="0.2" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="stackefficiencydegradation" className="col-span-2">Stack efficiency annual degradation (%):</Label>
-                    <Input id="stackefficiencydegradation" name="stackefficiencydegradation" className="col-span-2" defaultValue="0.00916667" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="stackLifetime" className="col-span-2">Lifetime of electrolyzer stack (Hours):</Label>
-                    <Input id="stackLifetime" name="stackLifetime" className="col-span-2" defaultValue="82000" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="TotalAuxRatedPowerDuringOperating" className="col-span-2">Total AUX rated power (during EL operating) (KW):</Label>
-                    <Input id="TotalAuxRatedPowerDuringOperating" name="TotalAuxRatedPowerDuringOperating" className="col-span-2" defaultValue="156" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="TotalAuxRatedPowerOutsideOperating" className="col-span-2">Total AUX rated power (outside EL operating) (KW):</Label>
-                    <Input id="TotalAuxRatedPowerOutsideOperating" name="TotalAuxRatedPowerOutsideOperating" className="col-span-2" defaultValue="42" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="BatteryroundtripEfficiency" className="col-span-2">Battery round-trip efficiency (%):</Label>
-                    <Input id="BatteryroundtripEfficiency" name="BatteryroundtripEfficiency" className="col-span-2" defaultValue="0.85" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="BatteryLife" className="col-span-2">Battery life (Years):</Label>
-                    <Input id="BatteryLife" name="BatteryLife" className="col-span-2" defaultValue="11" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="BatteryCapacityAnnualDegradation" className="col-span-2">Battery capacity annual degradation (%):</Label>
-                    <Input id="BatteryCapacityAnnualDegradation" name="BatteryCapacityAnnualDegradation" className="col-span-2" defaultValue="0.0235" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="PvType" className="col-span-2">PV type (Poly/Mono):</Label>
-                    <Input id="PvType" name="PvType" className="col-span-2" defaultValue="Mono" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="PVOutputAnnualDegradation" className="col-span-2">PV output annual degradation (%):</Label>
-                    <Input id="PVOutputAnnualDegradation" name="PVOutputAnnualDegradation" className="col-span-2" defaultValue="0.005" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="PvPlacement" className="col-span-2">Placement (Rooftop/Ground mounted) (RT/GM):</Label>
-                    <Input id="PvPlacement" name="PvPlacement" className="col-span-2" defaultValue="GM" />
+                  <h2 className="text-xl font-semibold mt-4">A. Assumptions (fixed inputs)</h2>
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">Demand & Commercial Contract</h3>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="client_h2flowrate" className="col-span-2">Customer required H₂ flow rate (NM³/hour):</Label>
+                      <Input id="client_h2flowrate" name="client_h2flowrate" className="col-span-2" defaultValue="0" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="client_h2flowhours" className="col-span-2">Hours of H₂ supply at flow rate:</Label>
+                      <Input id="client_h2flowhours" name="client_h2flowhours" className="col-span-2" defaultValue="24" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="projectLifetime" className="col-span-2">Project contract lifetime (Years):</Label>
+                      <Input id="projectLifetime" name="projectLifetime" className="col-span-2" defaultValue="20" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="contractCurrency" className="col-span-2">Contract pricing currency (USD/INR):</Label>
+                      <Input id="contractCurrency" name="contractCurrency" className="col-span-2" defaultValue="INR" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="o2MarketSellClientOfftake" className="col-span-2">O₂ market sell/Client Offtake (Yes/No):</Label>
+                      <Input id="o2MarketSellClientOfftake" name="o2MarketSellClientOfftake" className="col-span-2" defaultValue="Yes" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="o2MarketSellLimit" className="col-span-2">O₂ market sell limit (Nm³/month):</Label>
+                      <Input id="o2MarketSellLimit" name="o2MarketSellLimit" className="col-span-2" defaultValue="999999999" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="excessProductionH2Merchant" className="col-span-2">Excess production H₂ merchant market sell (Yes/No):</Label>
+                      <Input id="excessProductionH2Merchant" name="excessProductionH2Merchant" className="col-span-2" defaultValue="Yes" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="excessProductionH2MerchantLimit" className="col-span-2">Excess production H₂ merchant market sell limit (Nm³/month):</Label>
+                      <Input id="excessProductionH2MerchantLimit" name="excessProductionH2MerchantLimit" className="col-span-2" defaultValue="999999999" />
+                    </div>
                   </div>
                   
-                  <h3 className="text-lg font-semibold mt-6">Variables</h3>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="PV_DC_size_LowerRange" className="col-span-2">PV DC Size (MWPV-DC):</Label>
-                    <Input id="PV_DC_size_LowerRange" name="PV_DC_size_LowerRange" className="col-span-2" defaultValue="6.8745" />
-                    <Label htmlFor="PV_DC_size_HigherRange" className="col-span-1 text-center">to</Label>
-                    <Input id="PV_DC_size_HigherRange" name="PV_DC_size_HigherRange" className="col-span-1" defaultValue="6.8745" />
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">Delivery Conditions & Grid Interaction</h3>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="supplyPressureVsEL" className="col-span-2">Supply pressure vs. EL (Low/High):</Label>
+                      <Input id="supplyPressureVsEL" name="supplyPressureVsEL" className="col-span-2" defaultValue="High" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="injectExcessPower" className="col-span-2">Inject excess power to client/grid (Yes/No):</Label>
+                      <Input id="injectExcessPower" name="injectExcessPower" className="col-span-2" defaultValue="Yes" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="drawPowerFromClient" className="col-span-2">Draw power from client/grid (use as battery) (Yes/No):</Label>
+                      <Input id="drawPowerFromClient" name="drawPowerFromClient" className="col-span-2" defaultValue="Yes" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="inverter_ac_size_low" className="col-span-2">Inverter AC Size (MWPV-AC):</Label>
-                    <Input id="inverter_ac_size_low" name="inverter_ac_size_low" className="col-span-2" defaultValue="5.1967" />
-                    <Label htmlFor="inverter_ac_size_high" className="col-span-1 text-center">to</Label>
-                    <Input id="inverter_ac_size_high" name="inverter_ac_size_high" className="col-span-1" defaultValue="5.1967" />
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">Electrolyser Technology & Performance</h3>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="electrolyzerType" className="col-span-2">Electrolyzer Type (AEC/PEM):</Label>
+                      <Input id="electrolyzerType" name="electrolyzerType" className="col-span-2" defaultValue="AEC" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="electrolyzerstackConversion100Percent" className="col-span-2">Electrolyzer stack conversion (100% flow) (KwH/NM³):</Label>
+                      <Input id="electrolyzerstackConversion100Percent" name="electrolyzerstackConversion100Percent" className="col-span-2" defaultValue="4.6350" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="electrolyzerstackConversionMinTurndown" className="col-span-2">Electrolyzer stack conversion (min turndown flow) (KwH/NM³):</Label>
+                      <Input id="electrolyzerstackConversionMinTurndown" name="electrolyzerstackConversionMinTurndown" className="col-span-2" defaultValue="3.744" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="stackMinTurndownratio" className="col-span-2">Stack min turndown ratio %:</Label>
+                      <Input id="stackMinTurndownratio" name="stackMinTurndownratio" className="col-span-2" defaultValue="0.2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="stackefficiencydegradation" className="col-span-2">Stack efficiency annual degradation (%):</Label>
+                      <Input id="stackefficiencydegradation" name="stackefficiencydegradation" className="col-span-2" defaultValue="0.00916667" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="stackLifetime" className="col-span-2">Lifetime of electrolyzer stack (Hours):</Label>
+                      <Input id="stackLifetime" name="stackLifetime" className="col-span-2" defaultValue="82000" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="TotalAuxRatedPowerDuringOperating" className="col-span-2">Total AUX rated power (during EL operating) (KW):</Label>
+                      <Input id="TotalAuxRatedPowerDuringOperating" name="TotalAuxRatedPowerDuringOperating" className="col-span-2" defaultValue="156" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="TotalAuxRatedPowerOutsideOperating" className="col-span-2">Total AUX rated power (outside EL operating) (KW):</Label>
+                      <Input id="TotalAuxRatedPowerOutsideOperating" name="TotalAuxRatedPowerOutsideOperating" className="col-span-2" defaultValue="42" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="wind_size_low" className="col-span-2">Wind Size (MWWTG-DC):</Label>
-                    <Input id="wind_size_low" name="wind_size_low" className="col-span-2" defaultValue="4.0664" />
-                    <Label htmlFor="wind_size_high" className="col-span-1 text-center">to</Label>
-                    <Input id="wind_size_high" name="wind_size_high" className="col-span-1" defaultValue="4.0664" />
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">Renewable Generation</h3>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="PvType" className="col-span-2">PV type (Poly/Mono):</Label>
+                      <Input id="PvType" name="PvType" className="col-span-2" defaultValue="Mono" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="PVOutputAnnualDegradation" className="col-span-2">PV output annual degradation (%):</Label>
+                      <Input id="PVOutputAnnualDegradation" name="PVOutputAnnualDegradation" className="col-span-2" defaultValue="0.005" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="PvPlacement" className="col-span-2">Placement (Rooftop/Ground mounted) (RT/GM):</Label>
+                      <Input id="PvPlacement" name="PvPlacement" className="col-span-2" defaultValue="GM" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="power_evactuation_size_low" className="col-span-2">Power Evacuation Size (MWAC):</Label>
-                    <Input id="power_evactuation_size_low" name="power_evactuation_size_low" className="col-span-2" defaultValue="6" />
-                    <Label htmlFor="power_evactuation_size_high" className="col-span-1 text-center">to</Label>
-                    <Input id="power_evactuation_size_high" name="power_evactuation_size_high" className="col-span-1" defaultValue="6" />
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">Electrical & Battery System</h3>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="BatteryroundtripEfficiency" className="col-span-2">Battery round-trip efficiency (%):</Label>
+                      <Input id="BatteryroundtripEfficiency" name="BatteryroundtripEfficiency" className="col-span-2" defaultValue="0.85" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="BatteryLife" className="col-span-2">Battery life (Years):</Label>
+                      <Input id="BatteryLife" name="BatteryLife" className="col-span-2" defaultValue="11" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="BatteryCapacityAnnualDegradation" className="col-span-2">Battery capacity annual degradation (%):</Label>
+                      <Input id="BatteryCapacityAnnualDegradation" name="BatteryCapacityAnnualDegradation" className="col-span-2" defaultValue="0.0235" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="ltoa_size_low" className="col-span-2">LTOA Size (MWAC):</Label>
-                    <Input id="ltoa_size_low" name="ltoa_size_low" className="col-span-2" defaultValue="0" />
-                    <Label htmlFor="ltoa_size_high" className="col-span-1 text-center">to</Label>
-                    <Input id="ltoa_size_high" name="ltoa_size_high" className="col-span-1" defaultValue="0" />
+                  
+                  <h2 className="text-xl font-semibold mt-6">B. Variables (design knobs to iterate)</h2>
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">Renewable Generation</h3>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="PV_DC_size_LowerRange" className="col-span-2">PV DC Size (MW<sub>PV-DC</sub>):</Label>
+                      <Input id="PV_DC_size_LowerRange" name="PV_DC_size_LowerRange" className="col-span-2" defaultValue="6.8745" />
+                      <Label htmlFor="PV_DC_size_HigherRange" className="col-span-1 text-center">to</Label>
+                      <Input id="PV_DC_size_HigherRange" name="PV_DC_size_HigherRange" className="col-span-1" defaultValue="6.8745" />
+                    </div>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="inverter_ac_size_low" className="col-span-2">Inverter AC Size (MW<sub>PV-AC</sub>):</Label>
+                      <Input id="inverter_ac_size_low" name="inverter_ac_size_low" className="col-span-2" defaultValue="5.1967" />
+                      <Label htmlFor="inverter_ac_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="inverter_ac_size_high" name="inverter_ac_size_high" className="col-span-1" defaultValue="5.1967" />
+                    </div>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="wind_size_low" className="col-span-2">Wind Turbine Size (MW<sub>WTG-DC</sub>):</Label>
+                      <Input id="wind_size_low" name="wind_size_low" className="col-span-2" defaultValue="4.0664" />
+                      <Label htmlFor="wind_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="wind_size_high" name="wind_size_high" className="col-span-1" defaultValue="4.0664" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="battery_size_low" className="col-span-2">Battery Size (Kwh):</Label>
-                    <Input id="battery_size_low" name="battery_size_low" className="col-span-2" defaultValue="857.71" />
-                    <Label htmlFor="battery_size_high" className="col-span-1 text-center">to</Label>
-                    <Input id="battery_size_high" name="battery_size_high" className="col-span-1" defaultValue="857.71" />
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">Transmission / Interconnect</h3>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="power_evactuation_size_low" className="col-span-2">Power Evacuation Capacity (MW<sub>AC-Evac</sub>):</Label>
+                      <Input id="power_evactuation_size_low" name="power_evactuation_size_low" className="col-span-2" defaultValue="6" />
+                      <Label htmlFor="power_evactuation_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="power_evactuation_size_high" name="power_evactuation_size_high" className="col-span-1" defaultValue="6" />
+                    </div>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="ltoa_size_low" className="col-span-2">LTOA Capacity (MW<sub>LTOA</sub>):</Label>
+                      <Input id="ltoa_size_low" name="ltoa_size_low" className="col-span-2" defaultValue="0" />
+                      <Label htmlFor="ltoa_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="ltoa_size_high" name="ltoa_size_high" className="col-span-1" defaultValue="0" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="electrolyser_size_low" className="col-span-2">Electrolyser Size (MWEL-AC):</Label>
-                    <Input id="electrolyser_size_low" name="electrolyser_size_low" className="col-span-2" defaultValue="3.2445" />
-                    <Label htmlFor="electrolyser_size_high" className="col-span-1 text-center">to</Label>
-                    <Input id="electrolyser_size_high" name="electrolyser_size_high" className="col-span-1" defaultValue="3.2445" />
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">Battery System</h3>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="battery_size_low" className="col-span-2">Battery Energy Capacity (kWh<sub>Bat</sub>):</Label>
+                      <Input id="battery_size_low" name="battery_size_low" className="col-span-2" defaultValue="857.71" />
+                      <Label htmlFor="battery_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="battery_size_high" name="battery_size_high" className="col-span-1" defaultValue="857.71" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="low_bar_h2_storage_size_low" className="col-span-2">Low bar H2 Storage Size (Peak NM3):</Label>
-                    <Input id="low_bar_h2_storage_size_low" name="low_bar_h2_storage_size_low" className="col-span-2" defaultValue="215" />
-                    <Label htmlFor="low_bar_h2_storage_size_high" className="col-span-1 text-center">to</Label>
-                    <Input id="low_bar_h2_storage_size_high" name="low_bar_h2_storage_size_high" className="col-span-1" defaultValue="215" />
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">Power-to-Hydrogen Conversion</h3>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="electrolyser_size_low" className="col-span-2">Electrolyser Aggregate Capacity (MW<sub>EL-AC</sub>):</Label>
+                      <Input id="electrolyser_size_low" name="electrolyser_size_low" className="col-span-2" defaultValue="3.2445" />
+                      <Label htmlFor="electrolyser_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="electrolyser_size_high" name="electrolyser_size_high" className="col-span-1" defaultValue="3.2445" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="high_bar_h2_storage_size_low" className="col-span-2">High bar H2 Storage Size (Peak NM3):</Label>
-                    <Input id="high_bar_h2_storage_size_low" name="high_bar_h2_storage_size_low" className="col-span-2" defaultValue="12000" />
-                    <Label htmlFor="high_bar_h2_storage_size_high" className="col-span-1 text-center">to</Label>
-                    <Input id="high_bar_h2_storage_size_high" name="high_bar_h2_storage_size_high" className="col-span-1" defaultValue="12000" />
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">H₂ Storage & Compression</h3>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="low_bar_h2_storage_size_low" className="col-span-2">Low-pressure H₂ Storage (Nm³<sub>H₂-LP</sub>):</Label>
+                      <Input id="low_bar_h2_storage_size_low" name="low_bar_h2_storage_size_low" className="col-span-2" defaultValue="215" />
+                      <Label htmlFor="low_bar_h2_storage_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="low_bar_h2_storage_size_high" name="low_bar_h2_storage_size_high" className="col-span-1" defaultValue="215" />
+                    </div>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="high_bar_h2_storage_size_low" className="col-span-2">High-pressure H₂ Storage (Nm³<sub>H₂-HP</sub>):</Label>
+                      <Input id="high_bar_h2_storage_size_low" name="high_bar_h2_storage_size_low" className="col-span-2" defaultValue="12000" />
+                      <Label htmlFor="high_bar_h2_storage_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="high_bar_h2_storage_size_high" name="high_bar_h2_storage_size_high" className="col-span-1" defaultValue="12000" />
+                    </div>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="h2_compressor_throughput_low" className="col-span-2">H₂ Compressor Throughput (Nm³ h⁻¹<sub>Comp-H₂</sub>):</Label>
+                      <Input id="h2_compressor_throughput_low" name="h2_compressor_throughput_low" className="col-span-2" defaultValue="700" />
+                      <Label htmlFor="h2_compressor_throughput_high" className="col-span-1 text-center">to</Label>
+                      <Input id="h2_compressor_throughput_high" name="h2_compressor_throughput_high" className="col-span-1" defaultValue="700" />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="h2_compressor_throughput_low" className="col-span-2">H2 Compressor Throughput (NM3/hr):</Label>
-                    <Input id="h2_compressor_throughput_low" name="h2_compressor_throughput_low" className="col-span-2" defaultValue="700" />
-                    <Label htmlFor="h2_compressor_throughput_high" className="col-span-1 text-center">to</Label>
-                    <Input id="h2_compressor_throughput_high" name="h2_compressor_throughput_high" className="col-span-1" defaultValue="700" />
-                  </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="o2_storage_low" className="col-span-2">O2 Storage Size (Peak NM3):</Label>
-                    <Input id="o2_storage_low" name="o2_storage_low" className="col-span-2" defaultValue="106" />
-                    <Label htmlFor="o2_storage_high" className="col-span-1 text-center">to</Label>
-                    <Input id="o2_storage_high" name="o2_storage_high" className="col-span-1" defaultValue="106" />
-                  </div>
-                  <div className="grid grid-cols-6 items-center gap-4">
-                    <Label htmlFor="o2_compressor_throughput_low" className="col-span-2">O2 Compressor Throughput (NM3/hr):</Label>
-                    <Input id="o2_compressor_throughput_low" name="o2_compressor_throughput_low" className="col-span-2" defaultValue="350" />
-                    <Label htmlFor="o2_compressor_throughput_high" className="col-span-1 text-center">to</Label>
-                    <Input id="o2_compressor_throughput_high" name="o2_compressor_throughput_high" className="col-span-1" defaultValue="350" />
+                  
+                  <div className="bg-gray-50 p-4 rounded-md">
+                    <h3 className="text-lg font-semibold mb-3">O₂ Handling</h3>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="o2_storage_low" className="col-span-2">O₂ Storage (Nm³<sub>O₂-Stor</sub>):</Label>
+                      <Input id="o2_storage_low" name="o2_storage_low" className="col-span-2" defaultValue="106" />
+                      <Label htmlFor="o2_storage_high" className="col-span-1 text-center">to</Label>
+                      <Input id="o2_storage_high" name="o2_storage_high" className="col-span-1" defaultValue="106" />
+                    </div>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="o2_compressor_throughput_low" className="col-span-2">O₂ Compressor Throughput (Nm³ h⁻¹<sub>Comp-O₂</sub>):</Label>
+                      <Input id="o2_compressor_throughput_low" name="o2_compressor_throughput_low" className="col-span-2" defaultValue="350" />
+                      <Label htmlFor="o2_compressor_throughput_high" className="col-span-1 text-center">to</Label>
+                      <Input id="o2_compressor_throughput_high" name="o2_compressor_throughput_high" className="col-span-1" defaultValue="350" />
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-center">
