@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { History, Settings } from 'lucide-react'
+import { History, Settings, Activity } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { LucideIcon } from 'lucide-react'
@@ -35,14 +35,19 @@ function NavItem({ href, icon: Icon, label }: NavItemProps) {
 
 const navigationItems = [
   {
+    href: '/app/plant-sizing',
+    icon: Activity,
+    label: 'Quick Plant Simulator'
+  },
+  {
     href: '/app',
     icon: Settings,
-    label: 'Run Optimisation'
+    label: 'Sizing Optimizer'
   },
   {
     href: '/app/past-optimizations',
     icon: History,
-    label: 'Past Optimizations'
+    label: 'Past Optimisations'
   }
 ]
 
