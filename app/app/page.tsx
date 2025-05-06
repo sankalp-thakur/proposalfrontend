@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FinancialModelSummary } from "@/components/FinancialModelSummary"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Upload } from "lucide-react"
 import { withAuth } from '../form/authWrapper'
 import { toast } from 'react-toastify'
 
@@ -33,6 +33,9 @@ const RunOptimizationPage = () => {
   const [error, setError] = useState<string | null>(null)
   const [financialModels, setFinancialModels] = useState<string[]>([])
   const [isLoadingModels, setIsLoadingModels] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchFinancialModels = async () => {
     setIsLoadingModels(true);
@@ -56,6 +59,67 @@ const RunOptimizationPage = () => {
       toast.error('Failed to load financial models. Please try again later.');
     } finally {
       setIsLoadingModels(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+    
+    // Check if file is an Excel file
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      toast.error('Please upload an Excel file (.xlsx or .xls)');
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+    
+    setSelectedFile(file);
+  };
+
+  const handleUploadClick = async () => {
+    if (!selectedFile) {
+      toast.error('Please select a file first');
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/uploadFinancialModel`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      toast.success('Financial model uploaded successfully');
+      
+      // Reset the file input and selected file
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
+      // Refresh the list of financial models
+      fetchFinancialModels();
+    } catch (error) {
+      console.error('Error uploading financial model:', error);
+      toast.error('Failed to upload financial model. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -198,31 +262,76 @@ const RunOptimizationPage = () => {
               <CardDescription>Choose a financial model for your project optimization</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <Select 
-                  value={selectedModel} 
-                  onValueChange={setSelectedModel} 
-                  onOpenChange={(open) => {
-                    if (open && financialModels.length === 0) {
-                      fetchFinancialModels();
-                    }
-                  }}
-                >
-                  <SelectTrigger className="w-full h-10 px-3 py-2 text-base border rounded-md bg-white text-black">
-                    <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a financial model"} className="text-muted-foreground" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white text-black">
-                    {financialModels.map((modelName) => (
-                      <SelectItem key={modelName} value={modelName} className="cursor-pointer hover:bg-gray-100">
-                        {modelName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Upload New Financial Model</h3>
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex-1 flex items-center p-2 border rounded">
+                      <Input 
+                        id="modelUpload"
+                        ref={fileInputRef}
+                        type="file" 
+                        accept=".xlsx,.xls"
+                        onChange={handleFileSelect}
+                        className="hidden" 
+                        disabled={isUploading}
+                      />
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="mr-2"
+                      >
+                        Choose File
+                      </Button>
+                      <span className="text-gray-600 truncate">
+                        {selectedFile ? selectedFile.name : 'No file chosen'}
+                      </span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      className="whitespace-nowrap"
+                      disabled={isUploading || !selectedFile}
+                      onClick={handleUploadClick}
+                    >
+                      {isUploading ? 'Uploading...' : 'Upload Excel'}
+                      <Upload className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Upload an Excel file (.xlsx or .xls) with your financial model.
+                  </p>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-3">Select Existing Model</h3>
+                  <Select 
+                    value={selectedModel} 
+                    onValueChange={setSelectedModel} 
+                    onOpenChange={(open) => {
+                      if (open && financialModels.length === 0) {
+                        fetchFinancialModels();
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full h-10 px-3 py-2 text-base border rounded-md bg-white text-black">
+                      <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a financial model"} className="text-muted-foreground" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white text-black">
+                      {financialModels.map((modelName) => (
+                        <SelectItem key={modelName} value={modelName} className="cursor-pointer hover:bg-gray-100">
+                          {modelName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <Button 
                   onClick={() => setActiveTab("assumptions-variables")} 
                   disabled={!selectedModel || isLoadingModels}
-                  className="w-full flex items-center justify-center gap-2"
+                  className="w-full mt-6 flex items-center justify-center gap-2"
                 >
                   Continue to Assumptions & Variables
                   <ArrowRight className="h-4 w-4" />
