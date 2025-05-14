@@ -107,6 +107,7 @@ const RunOptimizationPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: requestBody,
       })
 
