@@ -23,6 +23,8 @@ Run the development server:
 
 ```bash
 npm run dev
+set NODE_ENV=production && npx next build
+set NODE_ENV=production && npx next start -H 0.0.0.0 -p 61907
 # or
 yarn dev
 ```

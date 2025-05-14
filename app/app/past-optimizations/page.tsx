@@ -358,5 +358,5 @@ const PastOptimizationsPage = () => {
   );
 };
 
-//export default withAuth(PastOptimizationsPage);
-export default PastOptimizationsPage
+export default withAuth(PastOptimizationsPage);
+//export default PastOptimizationsPage

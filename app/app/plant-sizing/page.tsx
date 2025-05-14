@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { saveAs } from "file-saver";
+import { withAuth } from '../../form/authWrapper';
 
 type Results = {
   totalHydrogenGenerated: number;
@@ -288,4 +289,4 @@ const PlantSizingPage: React.FC = () => {
   );
 };
 
-export default PlantSizingPage; 
+export default withAuth(PlantSizingPage); 
