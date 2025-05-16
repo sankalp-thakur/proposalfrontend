@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@../../components/ui/popover";
 import { withAuth } from '../../form/authWrapper';
 import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api'
 
 interface OptimizationResult {
   created_at: string;
@@ -66,12 +67,11 @@ const PastOptimizationsPage = () => {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/getOptimize`, {
+      const response = await apiFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/getOptimize`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -101,12 +101,11 @@ const PastOptimizationsPage = () => {
 
   const fetchOptimizationDetails = async (operationRunId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/detailedOptimise/${operationRunId}`, {
+      const response = await apiFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/detailedOptimise/${operationRunId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -127,12 +126,11 @@ const PastOptimizationsPage = () => {
     try {
       setDownloadingIds(prev => [...prev, operationRunId]);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/downloadExcel/${operationRunId}`, {
+      const response = await apiFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/downloadExcel/${operationRunId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
       });
 
       if (!response.ok) {
