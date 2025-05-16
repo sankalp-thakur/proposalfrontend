@@ -11,6 +11,7 @@ import { FinancialModelSummary } from "@/components/FinancialModelSummary"
 import { ArrowRight } from "lucide-react"
 import { withAuth } from '../form/authWrapper'
 import { toast } from 'react-toastify'
+import { apiFetch } from '@/lib/api'
 
 interface FinancialModel {
   name: string;
@@ -37,12 +38,11 @@ const RunOptimizationPage = () => {
   const fetchFinancialModels = async () => {
     setIsLoadingModels(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/getFinancialModels`, {
+      const response = await apiFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/getFinancialModels`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -102,12 +102,11 @@ const RunOptimizationPage = () => {
       const requestBody = JSON.stringify({ Ui_variables: data })
       console.log("[handleOptimize] Sending POST request to /optimize with body:", requestBody)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/optimize`, {
+      const response = await apiFetch(`${process.env.NEXT_PUBLIC_BASE_URL}/optimize`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: requestBody,
       })
 

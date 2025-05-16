@@ -1,6 +1,7 @@
 'use client';
 
 import { AUTH_CONFIG } from './authConfig';
+import { apiFetch } from '@/lib/api';
 
 /**
  * Validates the current session with the backend
@@ -9,9 +10,8 @@ import { AUTH_CONFIG } from './authConfig';
 export const validateSession = async () => {
   try {
     console.log('Validating session abheek');
-    const response = await fetch(AUTH_CONFIG.endpoints.validate, {
-      method: 'GET',
-      credentials: 'include'
+    const response = await apiFetch(AUTH_CONFIG.endpoints.validate, {
+      method: 'GET'
     });
     console.log('Response abheek');
     if (!response.ok) {
@@ -79,9 +79,8 @@ export const handleMsCallback = async (code) => {
  */
 export const logout = async () => {
   try {
-    const response = await fetch(AUTH_CONFIG.endpoints.logout, {
-      method: 'GET',
-      credentials: 'include'
+    const response = await apiFetch(AUTH_CONFIG.endpoints.logout, {
+      method: 'GET'
     });
 
     if (!response.ok) {
