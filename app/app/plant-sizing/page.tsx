@@ -1,7 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import baseProfileData from "@/app/data/baseProfile.json";
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,8 +27,25 @@ const PlantSizingPage: React.FC = () => {
   const [stockHighThreshold, setStockHighThreshold] = useState<number>(80000); // Stock volume threshold for high dispatch (NM3)
   const [supplyRateHigh, setSupplyRateHigh] = useState<number>(7649.125);     // High supply rate (NM3/hour) when stock > high threshold
   const [supplyRateLow, setSupplyRateLow] = useState<number>(6258.375);       // Base supply rate (NM3/hour) when stock above minimum threshold
-  const [baseProfile, setBaseProfile] = useState<number[]>(baseProfileData as number[]); // Hourly base profile (8760 values)
+  const [baseProfile, setBaseProfile] = useState<number[]>([]); // Hourly base profile (8760 values)
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [results, setResults] = useState<Results | null>(null);
+
+  useEffect(() => {
+    const loadBaseProfile = async () => {
+      setIsLoading(true);
+      try {
+        const profileModule = await import("@/app/data/baseProfile.json");
+        setBaseProfile(profileModule.default as number[]);
+      } catch (error) {
+        console.error("Failed to load base profile data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadBaseProfile();
+  }, []);
 
   // Parse CSV text into an array of numbers
   const parseCSVProfile = (csvText: string): number[] => {
@@ -154,21 +170,33 @@ const PlantSizingPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Plant Sizing Simulation</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="space-y-2">
-              <Label htmlFor="installedStack">Installed Stack Size (NM3/h):</Label>
-              <Input 
-                id="installedStack"
-                type="number" 
-                value={installedStack} 
-                onChange={e => setInstalledStack(Number(e.target.value))}
-              />
+      {isLoading ? (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Loading Plant Sizing Simulation...</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center items-center p-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
             </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Plant Sizing Simulation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="space-y-2">
+                <Label htmlFor="installedStack">Installed Stack Size (NM3/h):</Label>
+                <Input 
+                  id="installedStack"
+                  type="number" 
+                  value={installedStack} 
+                  onChange={e => setInstalledStack(Number(e.target.value))}
+                />
+              </div>
             <div className="space-y-2">
               <Label htmlFor="cylinderCapacity">Cylinder Capacity (NM3 @ 200 bar):</Label>
               <Input 
@@ -240,8 +268,9 @@ const PlantSizingPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+      )}
       
-      {results && (
+      {!isLoading && results && (
         <Card>
           <CardHeader>
             <CardTitle>Results</CardTitle>
@@ -292,4 +321,4 @@ const PlantSizingPage: React.FC = () => {
   );
 };
 
-export default withAuth(PlantSizingPage);    
+export default withAuth(PlantSizingPage);              
