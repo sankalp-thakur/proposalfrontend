@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { History, Settings, Activity } from 'lucide-react'
+import { History, Settings, Activity, Network } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { LucideIcon } from 'lucide-react'
@@ -48,6 +48,11 @@ const navigationItems = [
     href: '/app/past-optimizations',
     icon: History,
     label: 'Past Optimisations'
+  },
+  {
+    href: '/app/network-editor',
+    icon: Network,
+    label: 'Network Editor'
   }
 ]
 
