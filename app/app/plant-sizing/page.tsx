@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import baseProfileData from "@/app/data/baseProfile.json";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -77,77 +77,80 @@ const PlantSizingPage: React.FC = () => {
     saveAs(blob, "hourly-profile-template.csv");
   };
 
-  // Recalculate results whenever any assumption or profile changes
-  useEffect(() => {
-    const runSimulation = (): Results => {
-      const baseStackCapacity = 350;        // base profile stack size (NM3/hour) per Excel
-      const storageCapacity = 100000;       // fixed total storage capacity (NM3)
-      let stock = 0;
-      let totalGen = 0;
-      let totalSupplied = 0;
-      let totalVented = 0;
-      let zeroSupplyHours = 0;
-      let peakStock = 0;
-      const hours = baseProfile.length;
-      for (let i = 0; i < hours; i++) {
-        // Hourly hydrogen generation based on base profile and installed stack size
-        const generation = (baseProfile[i] / baseStackCapacity) * installedStack;
-        totalGen += generation;
-        // Stock available before dispatch: previous stock plus current generation
-        const stockPreSupply = stock + generation;
-        // Determine supply to client (Contracted Supply to CPCL) based on dispatch thresholds
-        let supply = 0;
-        if (stockPreSupply > stockHighThreshold) {
-          supply = supplyRateHigh;
-        } else if (stockPreSupply > supplyRateLow) {
-          supply = supplyRateLow;
-        } else {
-          supply = 0;
-        }
-        if (supply <= 0) {
-          zeroSupplyHours++;
-        }
-        // Do not supply more than available stock
-        if (supply > stockPreSupply) {
-          supply = stockPreSupply;
-        }
-        // Update stock after supplying to client
-        let stockAfterSupply = stockPreSupply - supply;
-        // Vent excess hydrogen if storage is full
-        let vent = 0;
-        if (stockAfterSupply > storageCapacity) {
-          if (generation > supplyRateHigh) {
-            // Vent all generation that could not be supplied (storage full)
-            vent = generation - supply;
-          } else {
-            vent = 0;
-          }
-          stockAfterSupply -= vent;
-          totalVented += vent;
-        }
-        // Carry over remaining stock to next hour
-        stock = stockAfterSupply;
-        if (stock > peakStock) {
-          peakStock = stock;
-        }
-        totalSupplied += supply;
+  const runSimulation = useCallback((): Results => {
+    const baseStackCapacity = 350;        // base profile stack size (NM3/hour) per Excel
+    const storageCapacity = 100000;       // fixed total storage capacity (NM3)
+    let stock = 0;
+    let totalGen = 0;
+    let totalSupplied = 0;
+    let totalVented = 0;
+    let zeroSupplyHours = 0;
+    let peakStock = 0;
+    const hours = baseProfile.length;
+    for (let i = 0; i < hours; i++) {
+      // Hourly hydrogen generation based on base profile and installed stack size
+      const generation = (baseProfile[i] / baseStackCapacity) * installedStack;
+      totalGen += generation;
+      // Stock available before dispatch: previous stock plus current generation
+      const stockPreSupply = stock + generation;
+      // Determine supply to client (Contracted Supply to CPCL) based on dispatch thresholds
+      let supply = 0;
+      if (stockPreSupply > stockHighThreshold) {
+        supply = supplyRateHigh;
+      } else if (stockPreSupply > supplyRateLow) {
+        supply = supplyRateLow;
+      } else {
+        supply = 0;
       }
-      const zeroSupplyDays = Math.ceil(zeroSupplyHours / 24);
-      const numberOfCylinders = Math.ceil(peakStock / cylinderCapacity);
-      const capitalCost = numberOfCylinders * cylinderCost;
-      return {
-        totalHydrogenGenerated: totalGen,
-        totalHydrogenSupplied: totalSupplied,
-        totalHydrogenVented: totalVented,
-        peakStock: peakStock,
-        numberOfCylinders: numberOfCylinders,
-        capitalCost: capitalCost,
-        zeroSupplyHours: zeroSupplyHours,
-        zeroSupplyDays: zeroSupplyDays
-      };
+      if (supply <= 0) {
+        zeroSupplyHours++;
+      }
+      // Do not supply more than available stock
+      if (supply > stockPreSupply) {
+        supply = stockPreSupply;
+      }
+      // Update stock after supplying to client
+      let stockAfterSupply = stockPreSupply - supply;
+      // Vent excess hydrogen if storage is full
+      let vent = 0;
+      if (stockAfterSupply > storageCapacity) {
+        if (generation > supplyRateHigh) {
+          // Vent all generation that could not be supplied (storage full)
+          vent = generation - supply;
+        } else {
+          vent = 0;
+        }
+        stockAfterSupply -= vent;
+        totalVented += vent;
+      }
+      // Carry over remaining stock to next hour
+      stock = stockAfterSupply;
+      if (stock > peakStock) {
+        peakStock = stock;
+      }
+      totalSupplied += supply;
+    }
+    const zeroSupplyDays = Math.ceil(zeroSupplyHours / 24);
+    const numberOfCylinders = Math.ceil(peakStock / cylinderCapacity);
+    const capitalCost = numberOfCylinders * cylinderCost;
+    return {
+      totalHydrogenGenerated: totalGen,
+      totalHydrogenSupplied: totalSupplied,
+      totalHydrogenVented: totalVented,
+      peakStock: peakStock,
+      numberOfCylinders: numberOfCylinders,
+      capitalCost: capitalCost,
+      zeroSupplyHours: zeroSupplyHours,
+      zeroSupplyDays: zeroSupplyDays
     };
-    setResults(runSimulation());
   }, [installedStack, cylinderCapacity, cylinderCost, stockHighThreshold, supplyRateHigh, supplyRateLow, baseProfile]);
+  
+  const memoizedResults = useMemo(() => runSimulation(), [runSimulation]);
+  
+  // Update results state when memoized results change
+  useEffect(() => {
+    setResults(memoizedResults);
+  }, [memoizedResults]);
 
   return (
     <div className="container mx-auto p-4">
@@ -289,4 +292,4 @@ const PlantSizingPage: React.FC = () => {
   );
 };
 
-export default withAuth(PlantSizingPage); 
+export default withAuth(PlantSizingPage);    
