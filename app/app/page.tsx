@@ -118,8 +118,6 @@ function RunOptimizationPage() {
   };
 
   const onSubmit = async (values: OptimizationFormValues) => {
-    console.log("[handleOptimize] Form submission started with values:", values)
-
     // Convert numeric values to floats
     const numericFields = [
       "client_h2flowrate", "client_h2flowhours", "projectLifetime", "o2MarketSellLimit",
@@ -153,11 +151,9 @@ function RunOptimizationPage() {
     })
 
     setIsOptimizing(true)
-    console.log("[handleOptimize] Set isOptimizing to true.")
 
     try {
       const requestBody = JSON.stringify({ Ui_variables: processedValues })
-      console.log("[handleOptimize] Sending POST request to /optimize with body:", requestBody)
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/optimize`, {
         method: 'POST',
@@ -168,38 +164,25 @@ function RunOptimizationPage() {
         body: requestBody,
       })
 
-      console.log("[handleOptimize] Received response:", response)
-
       if (!response.ok) {
-        console.error("[handleOptimize] Non-OK response status:", response.status, response.statusText)
         const errorText = await response.text()
-        console.error("[handleOptimize] Response error text:", errorText)
         throw new Error(`Optimization request failed: ${response.status} ${response.statusText}`)
       }
 
       const result = await response.json()
-      console.log("[handleOptimize] Parsed JSON response:", result)
 
       if (response.status === 202) {
-        console.log("[handleOptimize] Optimization request accepted successfully.")
         toast.success(`Optimization started with run id ${result.operation_run_id}`)
         setActiveTab("results")
       } else if (result.status === 'queued') {
-        console.log("[handleOptimize] Optimization request queued successfully.")
         toast.success("Your request has been queued. Results will be sent to your email address in approximately one hour.")
         setActiveTab("results")
       } else {
-        console.error("[handleOptimize] Unexpected response structure:", result)
         throw new Error('Unexpected response from server')
       }
     } catch (error: any) {
-      console.error("[handleOptimize] Caught error:", error)
-      if (error.stack) {
-        console.error("[handleOptimize] Error stack:", error.stack)
-      }
       toast.error(error.message || "An error occurred while submitting your optimization request. Please try again.")
     } finally {
-      console.log("[handleOptimize] Final cleanup: Setting isOptimizing to false.")
       setIsOptimizing(false)
     }
   }
@@ -218,7 +201,6 @@ function RunOptimizationPage() {
         minute: '2-digit'
       });
     } catch (error) {
-      console.error('Date formatting error:', error);
       return dateString;
     }
   };

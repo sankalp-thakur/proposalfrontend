@@ -8,12 +8,10 @@ import { AUTH_CONFIG } from './authConfig';
  */
 export const validateSession = async () => {
   try {
-    console.log('Validating session abheek');
     const response = await fetch(AUTH_CONFIG.endpoints.validate, {
       method: 'GET',
       credentials: 'include'
     });
-    console.log('Response abheek');
     if (!response.ok) {
       if (response.status === 401) {
         return { isValid: false, error: AUTH_CONFIG.errors.unauthorized };
@@ -27,7 +25,6 @@ export const validateSession = async () => {
       user: data.user
     };
   } catch (error) {
-    console.error('Session validation error:', error);
     return {
       isValid: false,
       error: error.message
@@ -65,7 +62,6 @@ export const handleMsCallback = async (code) => {
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error('MS callback error:', error);
     return {
       success: false,
       error: error.message
@@ -91,7 +87,6 @@ export const logout = async () => {
     const data = await response.json();
     return { success: true, message: data.message };
   } catch (error) {
-    console.error('Logout error:', error);
     return {
       success: false,
       error: error.message
@@ -111,4 +106,4 @@ export const requiresAuth = (pathname) => {
     '/terms'
   ];
   return !publicPaths.includes(pathname);
-}; 
+};        
