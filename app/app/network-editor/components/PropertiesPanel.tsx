@@ -21,7 +21,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     );
   }
 
-  if (selectedElement.source && selectedElement.target) {
+  if ('source' in selectedElement && 'target' in selectedElement) {
     const edge = selectedElement as Edge;
     return (
       <div className="properties-panel w-64">
