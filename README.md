@@ -8,8 +8,6 @@ This is the frontend application for the Hygenco Proposal system.
 2. Install dependencies:
    ```
    npm install
-   # or
-   yarn
    ```
 3. Create a `.env.local` file in the root directory with the following variables:
    ```
@@ -25,8 +23,6 @@ Run the development server:
 npm run dev
 set NODE_ENV=production && npx next build
 set NODE_ENV=production && npx next start -H 0.0.0.0 -p 61907
-# or
-yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -58,14 +54,10 @@ Authentication is handled through cookies. Make sure to include `credentials: 'i
 
 ```bash
 npm run build
-# or
-yarn build
 ```
 
 Then start the production server:
 
 ```bash
 npm start
-# or
-yarn start
-``` 
+```
