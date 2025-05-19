@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import ReactFlow, {
   ReactFlowProvider,
   addEdge,
@@ -18,9 +19,10 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import '../styles/editor.css';
 
-import ModuleNode from './ModuleNode';
-import ModuleSidebar from './ModuleSidebar';
-import PropertiesPanel from './PropertiesPanel';
+const ModuleNode = dynamic(() => import('./ModuleNode'), { ssr: false });
+const ModuleSidebar = dynamic(() => import('./ModuleSidebar'), { ssr: false });
+const PropertiesPanel = dynamic(() => import('./PropertiesPanel'), { ssr: false });
+
 import { moduleDefinitions } from '../data/moduleDefinitions';
 
 const nodeTypes: NodeTypes = {
@@ -51,7 +53,7 @@ const NetworkEditor: React.FC = () => {
       if (!sourcePort || !targetPort) return;
       
       if (sourcePort.dataType === targetPort.dataType) {
-        const edge: Edge = {
+        const edge = {
           ...connection,
           id: `e${connection.source}-${connection.sourceHandle}-${connection.target}-${connection.targetHandle}`,
           data: {

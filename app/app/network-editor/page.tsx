@@ -2,8 +2,12 @@
 
 import React from 'react';
 import { withAuth } from '../../form/authWrapper';
-import NetworkEditor from './components/NetworkEditor';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const NetworkEditor = dynamic(() => import('./components/NetworkEditor'), {
+  ssr: false,
+});
 
 const NetworkEditorPage: React.FC = () => {
   return (
