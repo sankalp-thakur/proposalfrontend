@@ -1,16 +1,28 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { validateSession, initiateLogin, logout } from './authUtils';
 import { AUTH_CONFIG } from './authConfig';
 
-export function withAuth(Component) {
-  return function ProtectedComponent(props) {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [user, setUser] = useState(null);
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+interface ProtectedComponentProps {
+  user: User | null;
+  onLogout: () => Promise<void>;
+  [key: string]: any;
+}
+
+export function withAuth<P extends object>(Component: React.ComponentType<P & ProtectedComponentProps>) {
+  return function ProtectedComponent(props: P): JSX.Element {
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const router = useRouter();
 
     const handleLogout = useCallback(async () => {
@@ -20,7 +32,7 @@ export function withAuth(Component) {
         setUser(null);
         router.push('/');
       } else {
-        setError(result.error);
+        setError(result.error || 'Logout failed');
       }
     }, [router]);
 
@@ -32,16 +44,15 @@ export function withAuth(Component) {
 
           const result = await validateSession();
           if (!result.isValid) {
-            setError(result.error);
+            setError(result.error || 'Session invalid');
             initiateLogin();
             return;
           }
 
-          setUser(result.user);
+          setUser(result.user || null);
           setIsAuthenticated(true);
-        } catch (error) {
-          console.error('Authentication error:', error);
-          setError(error.message);
+        } catch (error: any) {
+          setError(error.message || 'Authentication error');
         } finally {
           setIsLoading(false);
         }
@@ -79,9 +90,9 @@ export function withAuth(Component) {
     }
 
     if (!isAuthenticated) {
-      return null;
+      return <></>;
     }
 
-    return <Component {...props} user={user} onLogout={handleLogout} />;
+    return <Component {...props as P} user={user} onLogout={handleLogout} />;
   };
-} 
+}

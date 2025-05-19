@@ -1,11 +1,12 @@
 "use client"
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { History, Settings, Activity } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { History, Settings, Activity, LogOut } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { LucideIcon } from 'lucide-react'
+import { logout } from '@/app/form/authUtils'
 
 interface NavItemProps {
   href: string
@@ -52,6 +53,21 @@ const navigationItems = [
 ]
 
 export default function Sidebar() {
+  const router = useRouter();
+
+  const handleSignout = async () => {
+    try {
+      const result = await logout();
+      if (result.success) {
+        router.push('/');
+      } else {
+        console.error('Logout failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   return (
     <aside className="w-64 h-screen shrink-0 bg-[#1A3721] text-white border-r border-[#2A4731]">
       <div className="flex flex-col h-full">
@@ -70,8 +86,16 @@ export default function Sidebar() {
             ))}
           </nav>
         </div>
-        <div className="p-4 border-t border-[#2A4731]">
+        <div className="p-4 border-t border-[#2A4731] flex flex-col space-y-3">
           <span className="text-sm text-gray-400">v1.0.0</span>
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-white hover:bg-[#2A4731] hover:text-[#CCFF00] mt-2"
+            onClick={handleSignout}
+          >
+            <LogOut className="mr-2 h-5 w-5" />
+            <span>Sign Out</span>
+          </Button>
         </div>
       </div>
     </aside>
