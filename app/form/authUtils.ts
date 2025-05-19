@@ -2,11 +2,27 @@
 
 import { AUTH_CONFIG } from './authConfig';
 
+interface SessionValidationResult {
+  isValid: boolean;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  error?: string;
+}
+
+interface CallbackResult {
+  success: boolean;
+  data?: any;
+  error?: string;
+  message?: string;
+}
+
 /**
  * Validates the current session with the backend
- * @returns {Promise<{isValid: boolean, user?: {id: number, name: string, email: string}}>}
  */
-export const validateSession = async () => {
+export const validateSession = async (): Promise<SessionValidationResult> => {
   try {
     const response = await fetch(AUTH_CONFIG.endpoints.validate, {
       method: 'GET',
@@ -24,7 +40,7 @@ export const validateSession = async () => {
       isValid: true,
       user: data.user
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       isValid: false,
       error: error.message
@@ -35,16 +51,14 @@ export const validateSession = async () => {
 /**
  * Initiates the login process by redirecting to backend signin
  */
-export const initiateLogin = () => {
+export const initiateLogin = (): void => {
   window.location.href = AUTH_CONFIG.endpoints.signin;
 };
 
 /**
  * Handles Microsoft callback with authorization code
- * @param {string} code - The authorization code from Microsoft
- * @returns {Promise<{success: boolean, error?: string}>}
  */
-export const handleMsCallback = async (code) => {
+export const handleMsCallback = async (code: string): Promise<CallbackResult> => {
   try {
     const response = await fetch(AUTH_CONFIG.endpoints.msCallback, {
       method: 'POST',
@@ -61,7 +75,7 @@ export const handleMsCallback = async (code) => {
 
     const data = await response.json();
     return { success: true, data };
-  } catch (error) {
+  } catch (error: any) {
     return {
       success: false,
       error: error.message
@@ -71,9 +85,8 @@ export const handleMsCallback = async (code) => {
 
 /**
  * Handles user logout
- * @returns {Promise<{success: boolean, error?: string}>}
  */
-export const logout = async () => {
+export const logout = async (): Promise<CallbackResult> => {
   try {
     const response = await fetch(AUTH_CONFIG.endpoints.logout, {
       method: 'GET',
@@ -86,7 +99,7 @@ export const logout = async () => {
 
     const data = await response.json();
     return { success: true, message: data.message };
-  } catch (error) {
+  } catch (error: any) {
     return {
       success: false,
       error: error.message
@@ -97,13 +110,13 @@ export const logout = async () => {
 /**
  * Checks if the current route requires authentication
  */
-export const requiresAuth = (pathname) => {
+export const requiresAuth = (pathname: string): boolean => {
   const publicPaths = [
-    AUTH_CONFIG.routes.login,
-    '/unauthorized',
+    '/login',
+    AUTH_CONFIG.routes.unauthorized,
     '/',
     '/privacy',
     '/terms'
   ];
   return !publicPaths.includes(pathname);
-};        
+};
