@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import ReactFlow, {
   ReactFlowProvider,
@@ -35,23 +35,6 @@ const NetworkEditor: React.FC = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [selectedElement, setSelectedElement] = useState<Node | Edge | null>(null);
-  const [configName, setConfigName] = useState<string>('');
-  const [savedConfigs, setSavedConfigs] = useState<string[]>([]);
-  
-  useEffect(() => {
-    const loadSavedConfigNames = () => {
-      const configs: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('network-config-')) {
-          configs.push(key.replace('network-config-', ''));
-        }
-      }
-      setSavedConfigs(configs);
-    };
-    
-    loadSavedConfigNames();
-  }, []);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -161,50 +144,21 @@ const NetworkEditor: React.FC = () => {
     [setNodes]
   );
 
-  const saveNetworkConfiguration = useCallback((name: string) => {
-    if (!reactFlowInstance || !name.trim()) return;
-    
-    const flow = reactFlowInstance.toObject();
-    const config = {
-      name,
-      modules: flow.nodes,
-      connections: flow.edges
-    };
-    
-    try {
-      localStorage.setItem(`network-config-${name}`, JSON.stringify(config));
-      
-      if (!savedConfigs.includes(name)) {
-        setSavedConfigs(prev => [...prev, name]);
-      }
-      
-      alert(`Network configuration '${name}' saved successfully!`);
-      
-      return config;
-    } catch (error) {
-      console.error('Error saving network configuration:', error);
-      alert('Failed to save network configuration');
-      return null;
+  const saveNetwork = useCallback(() => {
+    if (reactFlowInstance) {
+      const flow = reactFlowInstance.toObject();
+      localStorage.setItem('gh2-network', JSON.stringify(flow));
+      alert('Network configuration saved successfully!');
     }
-  }, [reactFlowInstance, savedConfigs]);
+  }, [reactFlowInstance]);
 
-  const loadNetworkConfiguration = useCallback((name: string) => {
-    try {
-      const savedConfig = localStorage.getItem(`network-config-${name}`);
-      if (!savedConfig) {
-        alert(`No configuration found with name '${name}'`);
-        return false;
-      }
-      
-      const config = JSON.parse(savedConfig);
-      setNodes(config.modules || []);
-      setEdges(config.connections || []);
-      alert(`Network configuration '${name}' loaded successfully!`);
-      return true;
-    } catch (error) {
-      console.error('Error loading network configuration:', error);
-      alert('Failed to load network configuration');
-      return false;
+  const loadNetwork = useCallback(() => {
+    const savedFlow = localStorage.getItem('gh2-network');
+    if (savedFlow) {
+      const flow = JSON.parse(savedFlow);
+      setNodes(flow.nodes || []);
+      setEdges(flow.edges || []);
+      alert('Network configuration loaded successfully!');
     }
   }, [setNodes, setEdges]);
 
@@ -237,39 +191,16 @@ const NetworkEditor: React.FC = () => {
             <Background />
             <Controls />
             <Panel position="top-right">
-              <div className="bg-white p-2 rounded shadow-md flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Configuration name" 
-                  className="px-2 py-1 border rounded text-sm w-40"
-                  value={configName}
-                  onChange={(e) => setConfigName(e.target.value)}
-                />
-                <select
-                  className="px-2 py-1 border rounded text-sm"
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      setConfigName(e.target.value);
-                    }
-                  }}
-                  value=""
-                >
-                  <option value="">Load saved...</option>
-                  {savedConfigs.map((name) => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
+              <div className="flex gap-2">
                 <button
-                  onClick={() => saveNetworkConfiguration(configName)}
-                  disabled={!configName.trim()}
-                  className="px-3 py-1 bg-blue-500 text-white rounded text-sm disabled:bg-blue-300"
+                  onClick={saveNetwork}
+                  className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
                 >
                   Save
                 </button>
                 <button
-                  onClick={() => loadNetworkConfiguration(configName)}
-                  disabled={!configName.trim()}
-                  className="px-3 py-1 bg-green-500 text-white rounded text-sm disabled:bg-green-300"
+                  onClick={loadNetwork}
+                  className="px-3 py-1 bg-green-500 text-white rounded text-sm"
                 >
                   Load
                 </button>
