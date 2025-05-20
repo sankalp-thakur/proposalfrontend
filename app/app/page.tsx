@@ -42,7 +42,6 @@ interface ProjectDetails {
 
 const steps = [
   { id: 'project-details', label: 'Project Details' },
-  { id: 'financial-model', label: 'Financial Model' },
   { id: 'assumptions-variables', label: 'Assumptions & Variables' },
   { id: 'network-editor', label: 'Network Editor' },
 ];
@@ -441,65 +440,6 @@ function RunOptimizationPage() {
             />
           )}
           
-          {currentStep === 'financial-model' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Upload New Financial Model</h3>
-                <div className="flex items-center gap-4 mt-2">
-                  <div className="flex-1 flex items-center p-2 border rounded">
-                    <Input 
-                      id="modelUpload"
-                      ref={fileInputRef}
-                      type="file" 
-                      accept=".xlsx,.xls"
-                      onChange={handleFileSelect}
-                      className="hidden" 
-                      disabled={isUploading}
-                    />
-                    <Button 
-                      variant="outline" 
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploading}
-                      className="mr-2"
-                    >
-                      Browse...
-                    </Button>
-                    <span className="text-sm text-gray-500">
-                      {selectedFile ? selectedFile.name : 'No file selected'}
-                    </span>
-                  </div>
-                  <Button 
-                    onClick={handleUploadClick}
-                    disabled={!selectedFile || isUploading}
-                  >
-                    {isUploading ? 'Uploading...' : 'Upload'}
-                    <Upload className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="flex justify-between mt-6">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setCurrentStep('project-details')}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Project Details
-                </Button>
-                
-                <Button 
-                  onClick={() => setCurrentStep('assumptions-variables')}
-                  className="flex items-center gap-2"
-                >
-                  Continue to Assumptions
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-          
           {currentStep === 'assumptions-variables' && (
             <div>
               {projectDetails.financial_model && (
@@ -513,113 +453,82 @@ function RunOptimizationPage() {
                   <h2 className="text-xl font-semibold mt-4">A. Assumptions (fixed inputs)</h2>
                   
                   <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Demand &amp; Commercial Contract</h3>
-                    <div className="space-y-4">
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="client_h2flowrate">Customer required H₂ flow rate (NM³/hour):</Label>
-                        <Input id="client_h2flowrate" {...form.register("client_h2flowrate")} />
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="client_h2flowhours">Hours of H₂ supply at flow rate:</Label>
-                        <Input id="client_h2flowhours" {...form.register("client_h2flowhours")} />
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="projectLifetime">Project contract lifetime (Years):</Label>
-                        <Input id="projectLifetime" {...form.register("projectLifetime")} />
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="contractCurrency">Contract pricing currency (USD/INR):</Label>
-                        <Input id="contractCurrency" {...form.register("contractCurrency")} />
-                      </div>
+                    <h3 className="text-lg font-semibold mb-3">Demand & Commercial Contract</h3>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="client_h2flowrate" className="col-span-2">Customer required H₂ flow rate (NM³/hour):</Label>
+                      <Input id="client_h2flowrate" {...form.register("client_h2flowrate")} className="col-span-2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="client_h2flowhours" className="col-span-2">Hours of H₂ supply at flow rate:</Label>
+                      <Input id="client_h2flowhours" {...form.register("client_h2flowhours")} className="col-span-2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="projectLifetime" className="col-span-2">Project contract lifetime (Years):</Label>
+                      <Input id="projectLifetime" {...form.register("projectLifetime")} className="col-span-2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="contractCurrency" className="col-span-2">Contract pricing currency (USD/INR):</Label>
+                      <Input id="contractCurrency" {...form.register("contractCurrency")} className="col-span-2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="o2MarketSellClientOfftake" className="col-span-2">O₂ market sell/Client Offtake (Yes/No):</Label>
+                      <Input id="o2MarketSellClientOfftake" {...form.register("o2MarketSellClientOfftake")} className="col-span-2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="o2MarketSellLimit" className="col-span-2">O₂ market sell limit (Nm³/month):</Label>
+                      <Input id="o2MarketSellLimit" {...form.register("o2MarketSellLimit")} className="col-span-2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="excessProductionH2Merchant" className="col-span-2">Excess production H₂ merchant market sell (Yes/No):</Label>
+                      <Input id="excessProductionH2Merchant" {...form.register("excessProductionH2Merchant")} className="col-span-2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="excessProductionH2MerchantLimit" className="col-span-2">Excess production H₂ merchant market sell limit (Nm³/month):</Label>
+                      <Input id="excessProductionH2MerchantLimit" {...form.register("excessProductionH2MerchantLimit")} className="col-span-2" />
                     </div>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-md mt-4">
-                    <h3 className="text-lg font-semibold mb-3">Oxygen &amp; Hydrogen Market</h3>
-                    <div className="space-y-4">
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="o2MarketSellClientOfftake">O₂ market sell/Client Offtake (Yes/No):</Label>
-                        <Input id="o2MarketSellClientOfftake" {...form.register("o2MarketSellClientOfftake")} />
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="o2MarketSellLimit">O₂ market sell limit (Nm³/month):</Label>
-                        <Input id="o2MarketSellLimit" {...form.register("o2MarketSellLimit")} />
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="excessProductionH2Merchant">Excess production H₂ merchant market sell (Yes/No):</Label>
-                        <Input id="excessProductionH2Merchant" {...form.register("excessProductionH2Merchant")} />
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="excessProductionH2MerchantLimit">Excess production H₂ merchant market sell limit (Nm³/month):</Label>
-                        <Input id="excessProductionH2MerchantLimit" {...form.register("excessProductionH2MerchantLimit")} />
-                      </div>
+                    <h3 className="text-lg font-semibold mb-3">Delivery Conditions & Grid Interaction</h3>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="supplyPressureVsEL" className="col-span-2">Supply pressure vs. EL (Low/High):</Label>
+                      <Input id="supplyPressureVsEL" {...form.register("supplyPressureVsEL")} className="col-span-2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="injectExcessPower" className="col-span-2">Inject excess power to client/grid (Yes/No):</Label>
+                      <Input id="injectExcessPower" {...form.register("injectExcessPower")} className="col-span-2" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="drawPowerFromClient" className="col-span-2">Draw power from client/grid (use as battery) (Yes/No):</Label>
+                      <Input id="drawPowerFromClient" {...form.register("drawPowerFromClient")} className="col-span-2" />
                     </div>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-md mt-4">
-                    <h3 className="text-lg font-semibold mb-3">Delivery Conditions &amp; Grid Interaction</h3>
-                    <div className="space-y-4">
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="supplyPressureVsEL">Supply pressure vs. EL (Low/High):</Label>
-                        <Input id="supplyPressureVsEL" {...form.register("supplyPressureVsEL")} />
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="injectExcessPower">Inject excess power to client/grid (Yes/No):</Label>
-                        <Input id="injectExcessPower" {...form.register("injectExcessPower")} />
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="drawPowerFromClient">Draw power from client/grid (use as battery) (Yes/No):</Label>
-                        <Input id="drawPowerFromClient" {...form.register("drawPowerFromClient")} />
-                      </div>
+                    <h3 className="text-lg font-semibold mb-3">Electrolyser Technology & Performance</h3>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="electrolyzerType" className="col-span-2">Electrolyzer Type (AEC/PEM):</Label>
+                      <Input id="electrolyzerType" {...form.register("electrolyzerType")} className="col-span-2" />
                     </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md mt-4">
-                    <h3 className="text-lg font-semibold mb-3">Electrolyser Technology &amp; Performance</h3>
-                    <div className="space-y-4">
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="electrolyzerType">Electrolyzer Type (AEC/PEM):</Label>
-                        <Input id="electrolyzerType" {...form.register("electrolyzerType")} />
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <Label htmlFor="electrolyzerstackConversion100Percent">Electrolyzer stack conversion (100% flow) (KwH/NM³):</Label>
-                        <Input id="electrolyzerstackConversion100Percent" {...form.register("electrolyzerstackConversion100Percent")} />
-                      </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="electrolyzerstackConversion100Percent" className="col-span-2">Electrolyzer stack conversion (100% flow) (KwH/NM³):</Label>
+                      <Input id="electrolyzerstackConversion100Percent" {...form.register("electrolyzerstackConversion100Percent")} className="col-span-2" />
                     </div>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-md mt-4">
                     <h3 className="text-lg font-semibold mb-3">Optimization Variables</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-1/3">
-                          <Label htmlFor="electrolyser_size_low">Electrolyser Capacity (MW):</Label>
-                        </div>
-                        <div className="w-1/3">
-                          <Input id="electrolyser_size_low" {...form.register("electrolyser_size_low")} />
-                        </div>
-                        <div className="w-1/12 text-center">
-                          <span>to</span>
-                        </div>
-                        <div className="w-1/4">
-                          <Input id="electrolyser_size_high" {...form.register("electrolyser_size_high")} />
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <div className="w-1/3">
-                          <Label htmlFor="battery_size_low">Battery Capacity (kWh):</Label>
-                        </div>
-                        <div className="w-1/3">
-                          <Input id="battery_size_low" {...form.register("battery_size_low")} />
-                        </div>
-                        <div className="w-1/12 text-center">
-                          <span>to</span>
-                        </div>
-                        <div className="w-1/4">
-                          <Input id="battery_size_high" {...form.register("battery_size_high")} />
-                        </div>
-                      </div>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="electrolyser_size_low" className="col-span-2">Electrolyser Capacity (MW):</Label>
+                      <Input id="electrolyser_size_low" {...form.register("electrolyser_size_low")} className="col-span-2" />
+                      <Label htmlFor="electrolyser_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="electrolyser_size_high" {...form.register("electrolyser_size_high")} className="col-span-1" />
+                    </div>
+                    <div className="grid grid-cols-6 items-center gap-4">
+                      <Label htmlFor="battery_size_low" className="col-span-2">Battery Capacity (kWh):</Label>
+                      <Input id="battery_size_low" {...form.register("battery_size_low")} className="col-span-2" />
+                      <Label htmlFor="battery_size_high" className="col-span-1 text-center">to</Label>
+                      <Input id="battery_size_high" {...form.register("battery_size_high")} className="col-span-1" />
                     </div>
                   </div>
                   
