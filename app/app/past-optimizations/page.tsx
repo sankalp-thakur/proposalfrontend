@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@../../components/ui/popover";
 import { withAuth } from '../../form/authWrapper';
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 interface OptimizationResult {
   created_at: string;
@@ -85,9 +86,12 @@ const PastOptimizationsPage = () => {
       }
 
       setOptimizationResults(data);
+      toast.success('Optimization results loaded successfully');
     } catch (error) {
       console.error('Error fetching optimizations:', error);
-      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      setError(errorMessage);
+      toast.error(`Failed to load optimization results: ${errorMessage}`);
       setOptimizationResults([]);
     } finally {
       setIsLoading(false);
@@ -115,8 +119,11 @@ const PastOptimizationsPage = () => {
 
       const data = await response.json();
       setSelectedOptimization(data as DetailedOptimization);
+      toast.success('Optimization details loaded successfully');
     } catch (error) {
       console.error('Error fetching optimization details:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      toast.error(`Failed to load optimization details: ${errorMessage}`);
       setSelectedOptimization(null);
     }
   };
@@ -148,9 +155,11 @@ const PastOptimizationsPage = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
+      toast.success('Excel file downloaded successfully');
     } catch (error) {
       console.error('Error downloading excel:', error);
-      // You might want to show an error toast here
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      toast.error(`Failed to download Excel file: ${errorMessage}`);
     } finally {
       setDownloadingIds(prev => prev.filter(id => id !== operationRunId));
     }

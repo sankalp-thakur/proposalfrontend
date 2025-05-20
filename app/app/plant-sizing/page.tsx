@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { saveAs } from "file-saver";
 import { withAuth } from '../../form/authWrapper';
+import { toast } from 'react-toastify';
 
 type Results = {
   totalHydrogenGenerated: number;
@@ -65,15 +66,32 @@ const PlantSizingPage: React.FC = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    if (!file.name.endsWith('.csv')) {
+      toast.error('Please upload a CSV file');
+      return;
+    }
+    
     const reader = new FileReader();
     reader.onload = event => {
       const text = event.target?.result;
       if (typeof text === "string") {
-        const profile = parseCSVProfile(text);
-        if (profile.length > 0) {
-          setBaseProfile(profile);
+        try {
+          const profile = parseCSVProfile(text);
+          if (profile.length > 0) {
+            setBaseProfile(profile);
+            toast.success('Profile data loaded successfully');
+          } else {
+            toast.error('No valid data found in the CSV file');
+          }
+        } catch (error) {
+          console.error('Error parsing CSV:', error);
+          toast.error('Failed to parse CSV file');
         }
       }
+    };
+    reader.onerror = () => {
+      toast.error('Error reading file');
     };
     reader.readAsText(file);
   };
@@ -89,8 +107,14 @@ const PlantSizingPage: React.FC = () => {
       }
     });
     
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
-    saveAs(blob, "hourly-profile-template.csv");
+    try {
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+      saveAs(blob, "hourly-profile-template.csv");
+      toast.success('Template downloaded successfully');
+    } catch (error) {
+      console.error('Error creating template:', error);
+      toast.error('Failed to download template');
+    }
   };
 
   const runSimulation = useCallback((): Results => {
@@ -321,4 +345,4 @@ const PlantSizingPage: React.FC = () => {
   );
 };
 
-export default withAuth(PlantSizingPage);              
+export default withAuth(PlantSizingPage);                                                                                    
