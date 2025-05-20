@@ -49,11 +49,6 @@ const navigationItems = [
     href: '/app/past-optimizations',
     icon: History,
     label: 'Past Optimisations'
-  },
-  {
-    href: '/app/network-editor',
-    icon: Network,
-    label: 'Network Editor'
   }
 ]
 

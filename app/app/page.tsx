@@ -14,6 +14,13 @@ import { toast } from 'react-toastify'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { optimizationFormSchema, OptimizationFormValues } from '../utils/form'
+import ProgressBar from '@/components/ProgressBar'
+import ClientDetailsForm from '@/components/ClientDetailsForm'
+import dynamic from 'next/dynamic'
+
+const NetworkEditor = dynamic(() => import('./network-editor/components/NetworkEditor'), {
+  ssr: false,
+});
 
 interface FinancialModel {
   name: string;
@@ -39,6 +46,31 @@ function RunOptimizationPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [currentStep, setCurrentStep] = useState(0)
+  const [networkConfig, setNetworkConfig] = useState<any>(null)
+  const steps = ["Client Details", "Financial Model", "Assumptions & Variables", "Network Editor"]
+  
+  const goToNextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const goToPreviousStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const goToStep = (step: number) => {
+    if (step >= 0 && step < steps.length) {
+      setCurrentStep(step);
+    }
+  };
+  
+  const handleNetworkConfigChange = (config: any) => {
+    setNetworkConfig(config);
+  };
   
   const form = useForm<OptimizationFormValues>({
     resolver: zodResolver(optimizationFormSchema) as any,
@@ -217,7 +249,16 @@ function RunOptimizationPage() {
     setIsOptimizing(true)
 
     try {
-      const requestBody = JSON.stringify({ Ui_variables: processedValues })
+      const payload = {
+        clientName: processedValues.clientName,
+        latitude: processedValues.latitude,
+        longitude: processedValues.longitude,
+        financialModel: selectedModel,
+        Ui_variables: processedValues,
+        networkConfig: networkConfig
+      };
+
+      const requestBody = JSON.stringify(payload);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/optimize`, {
         method: 'POST',
@@ -288,140 +329,229 @@ function RunOptimizationPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="financial-model">Financial Model</TabsTrigger>
-          <TabsTrigger value="assumptions-variables">Assumptions & Variables</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-        </TabsList>
-        <TabsContent value="financial-model">
-          <Card>
-            <CardHeader>
-              <CardTitle>Select Financial Model</CardTitle>
-              <CardDescription>Choose a financial model for your project optimization</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Upload New Financial Model</h3>
-                  <div className="flex items-center gap-4 mt-2">
-                    <div className="flex-1 flex items-center p-2 border rounded">
-                      <Input 
-                        id="modelUpload"
-                        ref={fileInputRef}
-                        type="file" 
-                        accept=".xlsx,.xls"
-                        onChange={handleFileSelect}
-                        className="hidden" 
-                        disabled={isUploading}
-                      />
-                      <Button 
-                        type="button"
-                        variant="outline" 
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="mr-2"
-                      >
-                        Choose File
-                      </Button>
-                      <span className="text-gray-600 truncate">
-                        {selectedFile ? selectedFile.name : 'No file chosen'}
-                      </span>
-                    </div>
+      <ProgressBar 
+        steps={steps} 
+        currentStep={currentStep} 
+        onStepClick={goToStep} 
+      />
+      
+      {/* Step 1: Client Details */}
+      {currentStep === 0 && (
+        <ClientDetailsForm 
+          form={form} 
+          onNext={goToNextStep} 
+        />
+      )}
+      
+      {/* Step 2: Financial Model */}
+      {currentStep === 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Select Financial Model</CardTitle>
+            <CardDescription>Choose a financial model for your project optimization</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Upload New Financial Model</h3>
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="flex-1 flex items-center p-2 border rounded">
+                    <Input 
+                      id="modelUpload"
+                      ref={fileInputRef}
+                      type="file" 
+                      accept=".xlsx,.xls"
+                      onChange={handleFileSelect}
+                      className="hidden" 
+                      disabled={isUploading}
+                    />
                     <Button 
+                      type="button"
                       variant="outline" 
-                      className="whitespace-nowrap"
-                      disabled={isUploading || !selectedFile}
-                      onClick={handleUploadClick}
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                      className="mr-2"
                     >
-                      {isUploading ? 'Uploading...' : 'Upload Excel'}
-                      <Upload className="h-4 w-4 ml-2" />
+                      Choose File
                     </Button>
+                    <span className="text-gray-600 truncate">
+                      {selectedFile ? selectedFile.name : 'No file chosen'}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Upload an Excel file (.xlsx or .xls) with your financial model.
-                  </p>
-                </div>
-
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-3">Select Existing Model</h3>
-                  <Select 
-                    value={selectedModel} 
-                    onValueChange={setSelectedModel} 
-                    onOpenChange={(open) => {
-                      if (open && financialModels.length === 0) {
-                        fetchFinancialModels();
-                      }
-                    }}
+                  <Button 
+                    variant="outline" 
+                    className="whitespace-nowrap"
+                    disabled={isUploading || !selectedFile}
+                    onClick={handleUploadClick}
                   >
-                    <SelectTrigger className="w-full h-10 px-3 py-2 text-base border rounded-md bg-white text-black">
-                      <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a financial model"} className="text-muted-foreground" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white text-black">
-                      {financialModels.map((modelName) => (
-                        <SelectItem key={modelName} value={modelName} className="cursor-pointer hover:bg-gray-100">
-                          {modelName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    {isUploading ? 'Uploading...' : 'Upload Excel'}
+                    <Upload className="h-4 w-4 ml-2" />
+                  </Button>
                 </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Upload an Excel file (.xlsx or .xls) with your financial model.
+                </p>
+              </div>
 
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-3">Select Existing Model</h3>
+                <Select 
+                  value={selectedModel} 
+                  onValueChange={setSelectedModel} 
+                  onOpenChange={(open) => {
+                    if (open && financialModels.length === 0) {
+                      fetchFinancialModels();
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full h-10 px-3 py-2 text-base border rounded-md bg-white text-black">
+                    <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a financial model"} className="text-muted-foreground" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white text-black">
+                    {financialModels.map((modelName) => (
+                      <SelectItem key={modelName} value={modelName} className="cursor-pointer hover:bg-gray-100">
+                        {modelName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-between mt-6">
                 <Button 
-                  onClick={() => setActiveTab("assumptions-variables")} 
+                  onClick={goToPreviousStep} 
+                  variant="outline"
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={goToNextStep} 
                   disabled={!selectedModel || isLoadingModels}
-                  className="w-full mt-6 flex items-center justify-center gap-2"
+                  className="flex items-center justify-center gap-2"
                 >
                   Continue to Assumptions & Variables
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="assumptions-variables">
-          <Card>
-            <CardHeader>
-              <CardTitle>Assumptions & Variables</CardTitle>
-              <CardDescription>Set your project assumptions and variables</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {selectedModel && (
-                <FinancialModelSummary 
-                  model={{ name: selectedModel, description: '' }}
-                  customInputs={customInputs}
-                />
-              )}
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="grid gap-4">
-                  <h2 className="text-xl font-semibold mt-4">A. Assumptions (fixed inputs)</h2>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Demand & Commercial Contract</h3>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="client_h2flowrate" className="col-span-2">Customer required H₂ flow rate (NM³/hour):</Label>
-                      <Input id="client_h2flowrate" {...form.register("client_h2flowrate")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="client_h2flowhours" className="col-span-2">Hours of H₂ supply at flow rate:</Label>
-                      <Input id="client_h2flowhours" {...form.register("client_h2flowhours")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="projectLifetime" className="col-span-2">Project contract lifetime (Years):</Label>
-                      <Input id="projectLifetime" {...form.register("projectLifetime")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="contractCurrency" className="col-span-2">Contract pricing currency (USD/INR):</Label>
-                      <Input id="contractCurrency" {...form.register("contractCurrency")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="o2MarketSellClientOfftake" className="col-span-2">O₂ market sell/Client Offtake (Yes/No):</Label>
-                      <Input id="o2MarketSellClientOfftake" {...form.register("o2MarketSellClientOfftake")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="o2MarketSellLimit" className="col-span-2">O₂ market sell limit (Nm³/month):</Label>
-                      <Input id="o2MarketSellLimit" {...form.register("o2MarketSellLimit")} className="col-span-2" />
-                    </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Step 3: Assumptions & Variables */}
+      {currentStep === 2 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Assumptions & Variables</CardTitle>
+            <CardDescription>Set your project assumptions and variables</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {selectedModel && (
+              <FinancialModelSummary 
+                model={{ name: selectedModel, description: '' }}
+                customInputs={customInputs}
+              />
+            )}
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="grid gap-4">
+                <h2 className="text-xl font-semibold mt-4">A. Assumptions (fixed inputs)</h2>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Demand & Commercial Contract</h3>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="client_h2flowrate" className="col-span-2">Customer required H₂ flow rate (NM³/hour):</Label>
+                    <Input id="client_h2flowrate" {...form.register("client_h2flowrate")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="client_h2flowhours" className="col-span-2">Hours of H₂ supply at flow rate:</Label>
+                    <Input id="client_h2flowhours" {...form.register("client_h2flowhours")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="projectLifetime" className="col-span-2">Project contract lifetime (Years):</Label>
+                    <Input id="projectLifetime" {...form.register("projectLifetime")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="contractCurrency" className="col-span-2">Contract pricing currency (USD/INR):</Label>
+                    <Input id="contractCurrency" {...form.register("contractCurrency")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="o2MarketSellClientOfftake" className="col-span-2">O₂ market sell/Client Offtake (Yes/No):</Label>
+                    <Input id="o2MarketSellClientOfftake" {...form.register("o2MarketSellClientOfftake")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="o2MarketSellLimit" className="col-span-2">O₂ market sell limit (Nm³/month):</Label>
+                    <Input id="o2MarketSellLimit" {...form.register("o2MarketSellLimit")} className="col-span-2" />
+                  </div>
+                </div>
+                
+                {/* More form fields would go here */}
+                
+                <div className="flex justify-between mt-6">
+                  <Button 
+                    onClick={goToPreviousStep} 
+                    variant="outline"
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={goToNextStep} 
+                    className="flex items-center justify-center gap-2"
+                  >
+                    Continue to Network Editor
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Step 4: Network Editor */}
+      {currentStep === 3 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>GH2 Network Simulation Editor</CardTitle>
+            <CardDescription>Design your hydrogen production network by connecting modules</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-gray-600">
+              Design your hydrogen production network by dragging modules onto the canvas and connecting their input/output ports.
+              Configure module parameters in the properties panel.
+            </p>
+            <div className="h-[600px] border rounded-md mb-6">
+              <NetworkEditor onConfigChange={handleNetworkConfigChange} />
+            </div>
+            
+            <div className="flex justify-between mt-6">
+              <Button 
+                onClick={goToPreviousStep} 
+                variant="outline"
+              >
+                Back
+              </Button>
+              <Button 
+                onClick={form.handleSubmit(onSubmit)}
+                disabled={isOptimizing}
+                className="flex items-center justify-center gap-2"
+              >
+                {isOptimizing ? 'Optimizing...' : 'Run Optimization'}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Results display would go here */}
+      {selectedRun && (
+        <div className="mt-6">
+          {/* Results content */}
+        </div>
+      )}
+    </div>
+  );
+}
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="excessProductionH2Merchant" className="col-span-2">Excess production H₂ merchant market sell (Yes/No):</Label>
                       <Input id="excessProductionH2Merchant" {...form.register("excessProductionH2Merchant")} className="col-span-2" />

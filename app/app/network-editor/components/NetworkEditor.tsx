@@ -29,7 +29,11 @@ const nodeTypes: NodeTypes = {
   moduleNode: ModuleNode,
 };
 
-const NetworkEditor: React.FC = () => {
+interface NetworkEditorProps {
+  onConfigChange?: (config: any) => void;
+}
+
+const NetworkEditor: React.FC<NetworkEditorProps> = ({ onConfigChange }) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -148,9 +152,14 @@ const NetworkEditor: React.FC = () => {
     if (reactFlowInstance) {
       const flow = reactFlowInstance.toObject();
       localStorage.setItem('gh2-network', JSON.stringify(flow));
+      
+      if (onConfigChange) {
+        onConfigChange(flow);
+      }
+      
       alert('Network configuration saved successfully!');
     }
-  }, [reactFlowInstance]);
+  }, [reactFlowInstance, onConfigChange]);
 
   const loadNetwork = useCallback(() => {
     const savedFlow = localStorage.getItem('gh2-network');
