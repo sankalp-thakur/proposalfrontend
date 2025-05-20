@@ -324,7 +324,7 @@ function RunOptimizationPage() {
       ...projectDetails,
       ...data
     });
-    setCurrentStep('financial-model');
+    setCurrentStep('assumptions-variables');
   };
   
   const handleNetworkChange = (nodes: any[], edges: any[]) => {
