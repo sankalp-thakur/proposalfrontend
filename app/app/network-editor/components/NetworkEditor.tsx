@@ -148,9 +148,10 @@ const NetworkEditor = forwardRef<NetworkEditorRef, NetworkEditorProps>(({ onConf
     }
   }));
 
-  const loadInitialNetwork = useCallback(() => {
+  ///////
+  useEffect(() => {
     if (!reactFlowInstance) return;
-
+  
     const savedFlowString = localStorage.getItem('gh2-network');
     if (savedFlowString) {
       try {
@@ -174,7 +175,7 @@ const NetworkEditor = forwardRef<NetworkEditorRef, NetworkEditorProps>(({ onConf
         toast.error("Failed to load network from local storage due to invalid format.");
       }
     }
-
+  
     // If no valid saved data, load default
     setNodes(defaultReactFlowState.nodes);
     setEdges(defaultReactFlowState.edges);
@@ -184,13 +185,8 @@ const NetworkEditor = forwardRef<NetworkEditorRef, NetworkEditorProps>(({ onConf
     if (onConfigChange) {
       onConfigChange(defaultReactFlowState);
     }
-  }, [reactFlowInstance, setNodes, setEdges, onConfigChange]);
-  
-  useEffect(() => {
-    if (reactFlowInstance) {
-      loadInitialNetwork();
-    }
-  }, [reactFlowInstance, loadInitialNetwork]);
+  }, [reactFlowInstance]);
+  //////
 
   const onConnect = useCallback(
     (connection: Connection) => {
