@@ -28,21 +28,24 @@ export const moduleDefinitions = {
         name: 'PV Power',
         dataType: 'power',
         unit: 'MW',
-        description: 'Solar power generation'
+        description: 'Solar power generation',
+        isRequired: false
       },
       {
         id: 'wind_power',
         name: 'Wind Power',
         dataType: 'power',
         unit: 'MW',
-        description: 'Wind power generation'
+        description: 'Wind power generation',
+        isRequired: false
       },
       {
         id: 'total_power',
         name: 'Total Power',
         dataType: 'power',
         unit: 'MW',
-        description: 'Combined power generation'
+        description: 'Combined power generation',
+        isRequired: false
       }
     ],
     parameters: {
@@ -64,14 +67,16 @@ export const moduleDefinitions = {
         name: 'Charge Power',
         dataType: 'power',
         unit: 'MW',
-        description: 'Power input for charging'
+        description: 'Power input for charging',
+        isRequired: true
       },
       {
         id: 'discharge_request',
         name: 'Discharge Request',
         dataType: 'power',
         unit: 'MW',
-        description: 'Requested power output'
+        description: 'Requested power output',
+        isRequired: true
       }
     ],
     outputPorts: [
@@ -80,28 +85,32 @@ export const moduleDefinitions = {
         name: 'Available Power',
         dataType: 'power',
         unit: 'MW',
-        description: 'Power available for discharge'
+        description: 'Power available for discharge',
+        isRequired: false
       },
       {
         id: 'actual_discharge',
         name: 'Actual Discharge',
         dataType: 'power',
         unit: 'MW',
-        description: 'Actual power discharged'
+        description: 'Actual power discharged',
+        isRequired: false
       },
       {
         id: 'power_shortfall',
         name: 'Power Shortfall',
         dataType: 'power',
         unit: 'MW',
-        description: 'Shortfall in requested power'
+        description: 'Shortfall in requested power',
+        isRequired: false
       },
       {
         id: 'soc',
         name: 'State of Charge',
         dataType: 'percentage',
         unit: '%',
-        description: 'Current battery state of charge'
+        description: 'Current battery state of charge',
+        isRequired: false
       }
     ],
     parameters: {
@@ -125,7 +134,8 @@ export const moduleDefinitions = {
         name: 'Power Input',
         dataType: 'power',
         unit: 'MW',
-        description: 'Power input for hydrogen production'
+        description: 'Power input for hydrogen production',
+        isRequired: true
       }
     ],
     outputPorts: [
@@ -134,28 +144,32 @@ export const moduleDefinitions = {
         name: 'H₂ Output',
         dataType: 'hydrogen',
         unit: 'NM³/h',
-        description: 'Hydrogen production rate'
+        description: 'Hydrogen production rate',
+        isRequired: false
       },
       {
         id: 'o2_output',
         name: 'O₂ Output',
         dataType: 'oxygen',
         unit: 'NM³/h',
-        description: 'Oxygen production rate'
+        description: 'Oxygen production rate',
+        isRequired: false
       },
       {
         id: 'power_consumed',
         name: 'Power Consumed',
         dataType: 'power',
         unit: 'MW',
-        description: 'Actual power consumed'
+        description: 'Actual power consumed',
+        isRequired: false
       },
       {
         id: 'efficiency',
         name: 'Efficiency',
         dataType: 'percentage',
         unit: '%',
-        description: 'Current operating efficiency'
+        description: 'Current operating efficiency',
+        isRequired: false
       }
     ],
     parameters: {
@@ -178,14 +192,16 @@ export const moduleDefinitions = {
         name: 'H₂ Input',
         dataType: 'hydrogen',
         unit: 'NM³/h',
-        description: 'Hydrogen input flow rate'
+        description: 'Hydrogen input flow rate',
+        isRequired: true
       },
       {
         id: 'h2_output_request',
         name: 'H₂ Output Request',
         dataType: 'hydrogen',
         unit: 'NM³/h',
-        description: 'Requested hydrogen output flow rate'
+        description: 'Requested hydrogen output flow rate',
+        isRequired: true
       }
     ],
     outputPorts: [
@@ -194,28 +210,32 @@ export const moduleDefinitions = {
         name: 'H₂ Output',
         dataType: 'hydrogen',
         unit: 'NM³/h',
-        description: 'Actual hydrogen output flow rate'
+        description: 'Actual hydrogen output flow rate',
+        isRequired: false
       },
       {
         id: 'h2_excess',
         name: 'H₂ Excess',
         dataType: 'hydrogen',
         unit: 'NM³/h',
-        description: 'Excess hydrogen that could not be stored'
+        description: 'Excess hydrogen that could not be stored',
+        isRequired: false
       },
       {
         id: 'h2_shortfall',
         name: 'H₂ Shortfall',
         dataType: 'hydrogen',
         unit: 'NM³/h',
-        description: 'Hydrogen shortfall that could not be supplied'
+        description: 'Hydrogen shortfall that could not be supplied',
+        isRequired: false
       },
       {
         id: 'soc',
         name: 'State of Charge',
         dataType: 'percentage',
         unit: '%',
-        description: 'Current state of charge'
+        description: 'Current state of charge',
+        isRequired: false
       }
     ],
     parameters: {
@@ -239,14 +259,16 @@ export const moduleDefinitions = {
         name: 'O₂ Input',
         dataType: 'oxygen',
         unit: 'NM³/h',
-        description: 'Oxygen input flow rate'
+        description: 'Oxygen input flow rate',
+        isRequired: true
       },
       {
         id: 'o2_output_request',
         name: 'O₂ Output Request',
         dataType: 'oxygen',
         unit: 'NM³/h',
-        description: 'Requested oxygen output flow rate'
+        description: 'Requested oxygen output flow rate',
+        isRequired: true
       }
     ],
     outputPorts: [
@@ -255,28 +277,32 @@ export const moduleDefinitions = {
         name: 'O₂ Output',
         dataType: 'oxygen',
         unit: 'NM³/h',
-        description: 'Actual oxygen output flow rate'
+        description: 'Actual oxygen output flow rate',
+        isRequired: false
       },
       {
         id: 'o2_vented',
         name: 'O₂ Vented',
         dataType: 'oxygen',
         unit: 'NM³/h',
-        description: 'Oxygen vented to atmosphere'
+        description: 'Oxygen vented to atmosphere',
+        isRequired: false
       },
       {
         id: 'o2_shortfall',
         name: 'O₂ Shortfall',
         dataType: 'oxygen',
         unit: 'NM³/h',
-        description: 'Oxygen shortfall that could not be supplied'
+        description: 'Oxygen shortfall that could not be supplied',
+        isRequired: false
       },
       {
         id: 'soc',
         name: 'State of Charge',
         dataType: 'percentage',
         unit: '%',
-        description: 'Current state of charge'
+        description: 'Current state of charge',
+        isRequired: false
       }
     ],
     parameters: {
@@ -301,14 +327,16 @@ export const moduleDefinitions = {
         name: 'Power Request',
         dataType: 'power',
         unit: 'MW',
-        description: 'Requested power from grid'
+        description: 'Requested power from grid',
+        isRequired: true
       },
       {
         id: 'power_export',
         name: 'Power Export',
         dataType: 'power',
         unit: 'MW',
-        description: 'Power to export to grid'
+        description: 'Power to export to grid',
+        isRequired: true
       }
     ],
     outputPorts: [
@@ -317,28 +345,32 @@ export const moduleDefinitions = {
         name: 'Power Imported',
         dataType: 'power',
         unit: 'MW',
-        description: 'Actual power imported from grid'
+        description: 'Actual power imported from grid',
+        isRequired: false
       },
       {
         id: 'power_exported',
         name: 'Power Exported',
         dataType: 'power',
         unit: 'MW',
-        description: 'Actual power exported to grid'
+        description: 'Actual power exported to grid',
+        isRequired: false
       },
       {
         id: 'import_cost',
         name: 'Import Cost',
         dataType: 'cost',
         unit: 'currency/h',
-        description: 'Cost of imported power'
+        description: 'Cost of imported power',
+        isRequired: false
       },
       {
         id: 'export_revenue',
         name: 'Export Revenue',
         dataType: 'cost',
         unit: 'currency/h',
-        description: 'Revenue from exported power'
+        description: 'Revenue from exported power',
+        isRequired: false
       }
     ],
     parameters: {
@@ -360,14 +392,16 @@ export const moduleDefinitions = {
         name: 'H₂ Available',
         dataType: 'hydrogen',
         unit: 'NM³/h',
-        description: 'Available hydrogen for delivery'
+        description: 'Available hydrogen for delivery',
+        isRequired: true
       },
       {
         id: 'o2_available',
         name: 'O₂ Available',
         dataType: 'oxygen',
         unit: 'NM³/h',
-        description: 'Available oxygen for delivery'
+        description: 'Available oxygen for delivery',
+        isRequired: true
       }
     ],
     outputPorts: [
@@ -376,35 +410,40 @@ export const moduleDefinitions = {
         name: 'H₂ Delivered',
         dataType: 'hydrogen',
         unit: 'NM³/h',
-        description: 'Hydrogen delivered to clients'
+        description: 'Hydrogen delivered to clients',
+        isRequired: false
       },
       {
         id: 'o2_delivered',
         name: 'O₂ Delivered',
         dataType: 'oxygen',
         unit: 'NM³/h',
-        description: 'Oxygen delivered to clients'
+        description: 'Oxygen delivered to clients',
+        isRequired: false
       },
       {
         id: 'h2_revenue',
         name: 'H₂ Revenue',
         dataType: 'cost',
         unit: 'currency/h',
-        description: 'Revenue from hydrogen sales'
+        description: 'Revenue from hydrogen sales',
+        isRequired: false
       },
       {
         id: 'o2_revenue',
         name: 'O₂ Revenue',
         dataType: 'cost',
         unit: 'currency/h',
-        description: 'Revenue from oxygen sales'
+        description: 'Revenue from oxygen sales',
+        isRequired: false
       },
       {
         id: 'net_revenue',
         name: 'Net Revenue',
         dataType: 'cost',
         unit: 'currency/h',
-        description: 'Total revenue from all sales'
+        description: 'Total revenue from all sales',
+        isRequired: false
       }
     ],
     parameters: {
