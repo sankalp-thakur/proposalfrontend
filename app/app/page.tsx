@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,6 +13,14 @@ import { toast } from 'react-toastify'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { optimizationFormSchema, OptimizationFormValues } from '../utils/form'
+import ProgressBar from '@/components/ProgressBar'
+import ClientDetailsForm from '@/components/ClientDetailsForm'
+import dynamic from 'next/dynamic'
+import { NetworkEditorRef } from './network-editor/components/NetworkEditor';
+
+const NetworkEditor = dynamic(() => import('./network-editor/components/NetworkEditor'), {
+  ssr: false,
+});
 
 interface FinancialModel {
   name: string;
@@ -39,6 +46,32 @@ function RunOptimizationPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const networkEditorRef = useRef<NetworkEditorRef>(null);
+  const [currentStep, setCurrentStep] = useState(0)
+  const [networkConfig, setNetworkConfig] = useState<any>(null)
+  const steps = ["Client Details", "Financial Model", "Assumptions & Variables", "Network Editor"]
+  
+  const goToNextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const goToPreviousStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const goToStep = (step: number) => {
+    if (step >= 0 && step < steps.length) {
+      setCurrentStep(step);
+    }
+  };
+  
+  const handleNetworkConfigChange = (config: any) => {
+    setNetworkConfig(config);
+  };
   
   const form = useForm<OptimizationFormValues>({
     resolver: zodResolver(optimizationFormSchema) as any,
@@ -217,7 +250,28 @@ function RunOptimizationPage() {
     setIsOptimizing(true)
 
     try {
-      const requestBody = JSON.stringify({ Ui_variables: processedValues })
+      let finalNetworkConfig = networkConfig; 
+
+      if (currentStep === steps.indexOf("Network Editor")) { 
+        if (networkEditorRef.current && typeof networkEditorRef.current.getCurrentFlow === 'function') {
+          const currentFlowFromEditor = networkEditorRef.current.getCurrentFlow();
+          if (currentFlowFromEditor) {
+            setNetworkConfig(currentFlowFromEditor); 
+            finalNetworkConfig = currentFlowFromEditor;
+          }
+        }
+      }
+      
+      const payload = {
+        clientName: processedValues.clientName,
+        latitude: processedValues.latitude,
+        longitude: processedValues.longitude,
+        financialModel: selectedModel,
+        Ui_variables: processedValues,
+        networkConfig: finalNetworkConfig
+      };
+
+      const requestBody = JSON.stringify(payload);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/optimize`, {
         method: 'POST',
@@ -288,403 +342,418 @@ function RunOptimizationPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="financial-model">Financial Model</TabsTrigger>
-          <TabsTrigger value="assumptions-variables">Assumptions & Variables</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-        </TabsList>
-        <TabsContent value="financial-model">
-          <Card>
-            <CardHeader>
-              <CardTitle>Select Financial Model</CardTitle>
-              <CardDescription>Choose a financial model for your project optimization</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Upload New Financial Model</h3>
-                  <div className="flex items-center gap-4 mt-2">
-                    <div className="flex-1 flex items-center p-2 border rounded">
-                      <Input 
-                        id="modelUpload"
-                        ref={fileInputRef}
-                        type="file" 
-                        accept=".xlsx,.xls"
-                        onChange={handleFileSelect}
-                        className="hidden" 
-                        disabled={isUploading}
-                      />
-                      <Button 
-                        type="button"
-                        variant="outline" 
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="mr-2"
-                      >
-                        Choose File
-                      </Button>
-                      <span className="text-gray-600 truncate">
-                        {selectedFile ? selectedFile.name : 'No file chosen'}
-                      </span>
-                    </div>
+      <ProgressBar 
+        steps={steps} 
+        currentStep={currentStep} 
+        onStepClick={goToStep} 
+      />
+      
+      {/* Step 1: Client Details */}
+      {currentStep === 0 && (
+        <ClientDetailsForm 
+          form={form} 
+          onNext={goToNextStep} 
+        />
+      )}
+      
+      {/* Step 2: Financial Model */}
+      {currentStep === 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Select Financial Model</CardTitle>
+            <CardDescription>Choose a financial model for your project optimization</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Upload New Financial Model</h3>
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="flex-1 flex items-center p-2 border rounded">
+                    <Input 
+                      id="modelUpload"
+                      ref={fileInputRef}
+                      type="file" 
+                      accept=".xlsx,.xls"
+                      onChange={handleFileSelect}
+                      className="hidden" 
+                      disabled={isUploading}
+                    />
                     <Button 
+                      type="button"
                       variant="outline" 
-                      className="whitespace-nowrap"
-                      disabled={isUploading || !selectedFile}
-                      onClick={handleUploadClick}
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                      className="mr-2"
                     >
-                      {isUploading ? 'Uploading...' : 'Upload Excel'}
-                      <Upload className="h-4 w-4 ml-2" />
+                      Choose File
                     </Button>
+                    <span className="text-gray-600 truncate">
+                      {selectedFile ? selectedFile.name : 'No file chosen'}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Upload an Excel file (.xlsx or .xls) with your financial model.
-                  </p>
-                </div>
-
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-3">Select Existing Model</h3>
-                  <Select 
-                    value={selectedModel} 
-                    onValueChange={setSelectedModel} 
-                    onOpenChange={(open) => {
-                      if (open && financialModels.length === 0) {
-                        fetchFinancialModels();
-                      }
-                    }}
+                  <Button 
+                    variant="outline" 
+                    className="whitespace-nowrap"
+                    disabled={isUploading || !selectedFile}
+                    onClick={handleUploadClick}
                   >
-                    <SelectTrigger className="w-full h-10 px-3 py-2 text-base border rounded-md bg-white text-black">
-                      <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a financial model"} className="text-muted-foreground" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white text-black">
-                      {financialModels.map((modelName) => (
-                        <SelectItem key={modelName} value={modelName} className="cursor-pointer hover:bg-gray-100">
-                          {modelName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    {isUploading ? 'Uploading...' : 'Upload Excel'}
+                    <Upload className="h-4 w-4 ml-2" />
+                  </Button>
                 </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Upload an Excel file (.xlsx or .xls) with your financial model.
+                </p>
+              </div>
 
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-3">Select Existing Model</h3>
+                <Select 
+                  value={selectedModel} 
+                  onValueChange={setSelectedModel} 
+                  onOpenChange={(open) => {
+                    if (open && financialModels.length === 0) {
+                      fetchFinancialModels();
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full h-10 px-3 py-2 text-base border rounded-md bg-white text-black">
+                    <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a financial model"} className="text-muted-foreground" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white text-black">
+                    {financialModels.map((modelName) => (
+                      <SelectItem key={modelName} value={modelName} className="cursor-pointer hover:bg-gray-100">
+                        {modelName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-between mt-6">
                 <Button 
-                  onClick={() => setActiveTab("assumptions-variables")} 
+                  onClick={goToPreviousStep} 
+                  variant="outline"
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={goToNextStep} 
                   disabled={!selectedModel || isLoadingModels}
-                  className="w-full mt-6 flex items-center justify-center gap-2"
+                  className="flex items-center justify-center gap-2"
                 >
                   Continue to Assumptions & Variables
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="assumptions-variables">
-          <Card>
-            <CardHeader>
-              <CardTitle>Assumptions & Variables</CardTitle>
-              <CardDescription>Set your project assumptions and variables</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {selectedModel && (
-                <FinancialModelSummary 
-                  model={{ name: selectedModel, description: '' }}
-                  customInputs={customInputs}
-                />
-              )}
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="grid gap-4">
-                  <h2 className="text-xl font-semibold mt-4">A. Assumptions (fixed inputs)</h2>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Demand & Commercial Contract</h3>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="client_h2flowrate" className="col-span-2">Customer required H₂ flow rate (NM³/hour):</Label>
-                      <Input id="client_h2flowrate" {...form.register("client_h2flowrate")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="client_h2flowhours" className="col-span-2">Hours of H₂ supply at flow rate:</Label>
-                      <Input id="client_h2flowhours" {...form.register("client_h2flowhours")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="projectLifetime" className="col-span-2">Project contract lifetime (Years):</Label>
-                      <Input id="projectLifetime" {...form.register("projectLifetime")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="contractCurrency" className="col-span-2">Contract pricing currency (USD/INR):</Label>
-                      <Input id="contractCurrency" {...form.register("contractCurrency")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="o2MarketSellClientOfftake" className="col-span-2">O₂ market sell/Client Offtake (Yes/No):</Label>
-                      <Input id="o2MarketSellClientOfftake" {...form.register("o2MarketSellClientOfftake")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="o2MarketSellLimit" className="col-span-2">O₂ market sell limit (Nm³/month):</Label>
-                      <Input id="o2MarketSellLimit" {...form.register("o2MarketSellLimit")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="excessProductionH2Merchant" className="col-span-2">Excess production H₂ merchant market sell (Yes/No):</Label>
-                      <Input id="excessProductionH2Merchant" {...form.register("excessProductionH2Merchant")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="excessProductionH2MerchantLimit" className="col-span-2">Excess production H₂ merchant market sell limit (Nm³/month):</Label>
-                      <Input id="excessProductionH2MerchantLimit" {...form.register("excessProductionH2MerchantLimit")} className="col-span-2" />
-                    </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Step 3: Assumptions & Variables */}
+      {currentStep === 2 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Assumptions & Variables</CardTitle>
+            <CardDescription>Set your project assumptions and variables</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {selectedModel && (
+              <FinancialModelSummary 
+                model={{ name: selectedModel, description: '' }}
+                customInputs={customInputs}
+              />
+            )}
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="grid gap-4">
+                <h2 className="text-xl font-semibold mt-4">A. Assumptions (fixed inputs)</h2>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Demand & Commercial Contract</h3>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="client_h2flowrate" className="col-span-2">Customer required H₂ flow rate (NM³/hour):</Label>
+                    <Input id="client_h2flowrate" {...form.register("client_h2flowrate")} className="col-span-2" />
                   </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Delivery Conditions & Grid Interaction</h3>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="supplyPressureVsEL" className="col-span-2">Supply pressure vs. EL (Low/High):</Label>
-                      <Input id="supplyPressureVsEL" {...form.register("supplyPressureVsEL")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="injectExcessPower" className="col-span-2">Inject excess power to client/grid (Yes/No):</Label>
-                      <Input id="injectExcessPower" {...form.register("injectExcessPower")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="drawPowerFromClient" className="col-span-2">Draw power from client/grid (use as battery) (Yes/No):</Label>
-                      <Input id="drawPowerFromClient" {...form.register("drawPowerFromClient")} className="col-span-2" />
-                    </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="client_h2flowhours" className="col-span-2">Hours of H₂ supply at flow rate:</Label>
+                    <Input id="client_h2flowhours" {...form.register("client_h2flowhours")} className="col-span-2" />
                   </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Electrolyser Technology & Performance</h3>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="electrolyzerType" className="col-span-2">Electrolyzer Type (AEC/PEM):</Label>
-                      <Input id="electrolyzerType" {...form.register("electrolyzerType")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="electrolyzerstackConversion100Percent" className="col-span-2">Electrolyzer stack conversion (100% flow) (KwH/NM³):</Label>
-                      <Input id="electrolyzerstackConversion100Percent" {...form.register("electrolyzerstackConversion100Percent")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="electrolyzerstackConversionMinTurndown" className="col-span-2">Electrolyzer stack conversion (min turndown flow) (KwH/NM³):</Label>
-                      <Input id="electrolyzerstackConversionMinTurndown" {...form.register("electrolyzerstackConversionMinTurndown")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="stackMinTurndownratio" className="col-span-2">Stack min turndown ratio %:</Label>
-                      <Input id="stackMinTurndownratio" {...form.register("stackMinTurndownratio")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="stackefficiencydegradation" className="col-span-2">Stack efficiency annual degradation (%):</Label>
-                      <Input id="stackefficiencydegradation" {...form.register("stackefficiencydegradation")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="stackLifetime" className="col-span-2">Lifetime of electrolyzer stack (Hours):</Label>
-                      <Input id="stackLifetime" {...form.register("stackLifetime")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="TotalAuxRatedPowerDuringOperating" className="col-span-2">Total AUX rated power (during EL operating) (KW):</Label>
-                      <Input id="TotalAuxRatedPowerDuringOperating" {...form.register("TotalAuxRatedPowerDuringOperating")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="TotalAuxRatedPowerOutsideOperating" className="col-span-2">Total AUX rated power (outside EL operating) (KW):</Label>
-                      <Input id="TotalAuxRatedPowerOutsideOperating" {...form.register("TotalAuxRatedPowerOutsideOperating")} className="col-span-2" />
-                    </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="projectLifetime" className="col-span-2">Project contract lifetime (Years):</Label>
+                    <Input id="projectLifetime" {...form.register("projectLifetime")} className="col-span-2" />
                   </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Renewable Generation</h3>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="PvType" className="col-span-2">PV type (Poly/Mono):</Label>
-                      <Input id="PvType" {...form.register("PvType")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="PVOutputAnnualDegradation" className="col-span-2">PV output annual degradation (%):</Label>
-                      <Input id="PVOutputAnnualDegradation" {...form.register("PVOutputAnnualDegradation")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="PvPlacement" className="col-span-2">Placement (Rooftop/Ground mounted) (RT/GM):</Label>
-                      <Input id="PvPlacement" {...form.register("PvPlacement")} className="col-span-2" />
-                    </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="contractCurrency" className="col-span-2">Contract pricing currency (USD/INR):</Label>
+                    <Input id="contractCurrency" {...form.register("contractCurrency")} className="col-span-2" />
                   </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Electrical & Battery System</h3>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="BatteryroundtripEfficiency" className="col-span-2">Battery round-trip efficiency (%):</Label>
-                      <Input id="BatteryroundtripEfficiency" {...form.register("BatteryroundtripEfficiency")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="BatteryLife" className="col-span-2">Battery life (Years):</Label>
-                      <Input id="BatteryLife" {...form.register("BatteryLife")} className="col-span-2" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="BatteryCapacityAnnualDegradation" className="col-span-2">Battery capacity annual degradation (%):</Label>
-                      <Input id="BatteryCapacityAnnualDegradation" {...form.register("BatteryCapacityAnnualDegradation")} className="col-span-2" />
-                    </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="o2MarketSellClientOfftake" className="col-span-2">O₂ market sell/Client Offtake (Yes/No):</Label>
+                    <Input id="o2MarketSellClientOfftake" {...form.register("o2MarketSellClientOfftake")} className="col-span-2" />
                   </div>
-                  
-                  <h2 className="text-xl font-semibold mt-6">B. Variables (design knobs to iterate)</h2>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Renewable Generation</h3>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="PV_DC_size_LowerRange" className="col-span-2">PV DC Size (MW<sub>PV-DC</sub>):</Label>
-                      <Input id="PV_DC_size_LowerRange" {...form.register("PV_DC_size_LowerRange")} className="col-span-2" />
-                      <Label htmlFor="PV_DC_size_HigherRange" className="col-span-1 text-center">to</Label>
-                      <Input id="PV_DC_size_HigherRange" {...form.register("PV_DC_size_HigherRange")} className="col-span-1" />
-                    </div>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="inverter_ac_size_low" className="col-span-2">Inverter AC Size (MW<sub>PV-AC</sub>):</Label>
-                      <Input id="inverter_ac_size_low" {...form.register("inverter_ac_size_low")} className="col-span-2" />
-                      <Label htmlFor="inverter_ac_size_high" className="col-span-1 text-center">to</Label>
-                      <Input id="inverter_ac_size_high" {...form.register("inverter_ac_size_high")} className="col-span-1" />
-                    </div>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="wind_size_low" className="col-span-2">Wind Turbine Size (MW<sub>WTG-DC</sub>):</Label>
-                      <Input id="wind_size_low" {...form.register("wind_size_low")} className="col-span-2" />
-                      <Label htmlFor="wind_size_high" className="col-span-1 text-center">to</Label>
-                      <Input id="wind_size_high" {...form.register("wind_size_high")} className="col-span-1" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Transmission / Interconnect</h3>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="power_evactuation_size_low" className="col-span-2">Power Evacuation Capacity (MW<sub>AC-Evac</sub>):</Label>
-                      <Input id="power_evactuation_size_low" {...form.register("power_evactuation_size_low")} className="col-span-2" />
-                      <Label htmlFor="power_evactuation_size_high" className="col-span-1 text-center">to</Label>
-                      <Input id="power_evactuation_size_high" {...form.register("power_evactuation_size_high")} className="col-span-1" />
-                    </div>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="ltoa_size_low" className="col-span-2">LTOA Capacity (MW<sub>LTOA</sub>):</Label>
-                      <Input id="ltoa_size_low" {...form.register("ltoa_size_low")} className="col-span-2" />
-                      <Label htmlFor="ltoa_size_high" className="col-span-1 text-center">to</Label>
-                      <Input id="ltoa_size_high" {...form.register("ltoa_size_high")} className="col-span-1" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Battery System</h3>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="battery_size_low" className="col-span-2">Battery Energy Capacity (kWh<sub>Bat</sub>):</Label>
-                      <Input id="battery_size_low" {...form.register("battery_size_low")} className="col-span-2" />
-                      <Label htmlFor="battery_size_high" className="col-span-1 text-center">to</Label>
-                      <Input id="battery_size_high" {...form.register("battery_size_high")} className="col-span-1" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">Power-to-Hydrogen Conversion</h3>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="electrolyser_size_low" className="col-span-2">Electrolyser Aggregate Capacity (MW<sub>EL-AC</sub>):</Label>
-                      <Input id="electrolyser_size_low" {...form.register("electrolyser_size_low")} className="col-span-2" />
-                      <Label htmlFor="electrolyser_size_high" className="col-span-1 text-center">to</Label>
-                      <Input id="electrolyser_size_high" {...form.register("electrolyser_size_high")} className="col-span-1" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">H₂ Storage & Compression</h3>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="low_bar_h2_storage_size_low" className="col-span-2">Low-pressure H₂ Storage (Nm³<sub>H₂-LP</sub>):</Label>
-                      <Input id="low_bar_h2_storage_size_low" {...form.register("low_bar_h2_storage_size_low")} className="col-span-2" />
-                      <Label htmlFor="low_bar_h2_storage_size_high" className="col-span-1 text-center">to</Label>
-                      <Input id="low_bar_h2_storage_size_high" {...form.register("low_bar_h2_storage_size_high")} className="col-span-1" />
-                    </div>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="high_bar_h2_storage_size_low" className="col-span-2">High-pressure H₂ Storage (Nm³<sub>H₂-HP</sub>):</Label>
-                      <Input id="high_bar_h2_storage_size_low" {...form.register("high_bar_h2_storage_size_low")} className="col-span-2" />
-                      <Label htmlFor="high_bar_h2_storage_size_high" className="col-span-1 text-center">to</Label>
-                      <Input id="high_bar_h2_storage_size_high" {...form.register("high_bar_h2_storage_size_high")} className="col-span-1" />
-                    </div>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="h2_compressor_throughput_low" className="col-span-2">H₂ Compressor Throughput (Nm³ h⁻¹<sub>Comp-H₂</sub>):</Label>
-                      <Input id="h2_compressor_throughput_low" {...form.register("h2_compressor_throughput_low")} className="col-span-2" />
-                      <Label htmlFor="h2_compressor_throughput_high" className="col-span-1 text-center">to</Label>
-                      <Input id="h2_compressor_throughput_high" {...form.register("h2_compressor_throughput_high")} className="col-span-1" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <h3 className="text-lg font-semibold mb-3">O₂ Handling</h3>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="o2_storage_low" className="col-span-2">O₂ Storage (Nm³<sub>O₂-Stor</sub>):</Label>
-                      <Input id="o2_storage_low" {...form.register("o2_storage_low")} className="col-span-2" />
-                      <Label htmlFor="o2_storage_high" className="col-span-1 text-center">to</Label>
-                      <Input id="o2_storage_high" {...form.register("o2_storage_high")} className="col-span-1" />
-                    </div>
-                    <div className="grid grid-cols-6 items-center gap-4">
-                      <Label htmlFor="o2_compressor_throughput_low" className="col-span-2">O₂ Compressor Throughput (Nm³ h⁻¹<sub>Comp-O₂</sub>):</Label>
-                      <Input id="o2_compressor_throughput_low" {...form.register("o2_compressor_throughput_low")} className="col-span-2" />
-                      <Label htmlFor="o2_compressor_throughput_high" className="col-span-1 text-center">to</Label>
-                      <Input id="o2_compressor_throughput_high" {...form.register("o2_compressor_throughput_high")} className="col-span-1" />
-                    </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="o2MarketSellLimit" className="col-span-2">O₂ market sell limit (Nm³/month):</Label>
+                    <Input id="o2MarketSellLimit" {...form.register("o2MarketSellLimit")} className="col-span-2" />
                   </div>
                 </div>
-                <div className="flex justify-center">
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Excess production H₂ merchant market sell</h3>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="excessProductionH2Merchant" className="col-span-2">Excess production H₂ merchant market sell (Yes/No):</Label>
+                    <Input id="excessProductionH2Merchant" {...form.register("excessProductionH2Merchant")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="excessProductionH2MerchantLimit" className="col-span-2">Excess production H₂ merchant market sell limit (Nm³/month):</Label>
+                    <Input id="excessProductionH2MerchantLimit" {...form.register("excessProductionH2MerchantLimit")} className="col-span-2" />
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Delivery Conditions & Grid Interaction</h3>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="supplyPressureVsEL" className="col-span-2">Supply pressure vs. EL (Low/High):</Label>
+                    <Input id="supplyPressureVsEL" {...form.register("supplyPressureVsEL")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="injectExcessPower" className="col-span-2">Inject excess power to client/grid (Yes/No):</Label>
+                    <Input id="injectExcessPower" {...form.register("injectExcessPower")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="drawPowerFromClient" className="col-span-2">Draw power from client/grid (use as battery) (Yes/No):</Label>
+                    <Input id="drawPowerFromClient" {...form.register("drawPowerFromClient")} className="col-span-2" />
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Electrolyser Technology & Performance</h3>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="electrolyzerType" className="col-span-2">Electrolyzer Type (AEC/PEM):</Label>
+                    <Input id="electrolyzerType" {...form.register("electrolyzerType")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="electrolyzerstackConversion100Percent" className="col-span-2">Electrolyzer stack conversion (100% flow) (KwH/NM³):</Label>
+                    <Input id="electrolyzerstackConversion100Percent" {...form.register("electrolyzerstackConversion100Percent")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="electrolyzerstackConversionMinTurndown" className="col-span-2">Electrolyzer stack conversion (min turndown flow) (KwH/NM³):</Label>
+                    <Input id="electrolyzerstackConversionMinTurndown" {...form.register("electrolyzerstackConversionMinTurndown")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="stackMinTurndownratio" className="col-span-2">Stack min turndown ratio %:</Label>
+                    <Input id="stackMinTurndownratio" {...form.register("stackMinTurndownratio")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="stackefficiencydegradation" className="col-span-2">Stack efficiency annual degradation (%):</Label>
+                    <Input id="stackefficiencydegradation" {...form.register("stackefficiencydegradation")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="stackLifetime" className="col-span-2">Lifetime of electrolyzer stack (Hours):</Label>
+                    <Input id="stackLifetime" {...form.register("stackLifetime")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="TotalAuxRatedPowerDuringOperating" className="col-span-2">Total AUX rated power (during EL operating) (KW):</Label>
+                    <Input id="TotalAuxRatedPowerDuringOperating" {...form.register("TotalAuxRatedPowerDuringOperating")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="TotalAuxRatedPowerOutsideOperating" className="col-span-2">Total AUX rated power (outside EL operating) (KW):</Label>
+                    <Input id="TotalAuxRatedPowerOutsideOperating" {...form.register("TotalAuxRatedPowerOutsideOperating")} className="col-span-2" />
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Renewable Generation</h3>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="PvType" className="col-span-2">PV type (Poly/Mono):</Label>
+                    <Input id="PvType" {...form.register("PvType")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="PVOutputAnnualDegradation" className="col-span-2">PV output annual degradation (%):</Label>
+                    <Input id="PVOutputAnnualDegradation" {...form.register("PVOutputAnnualDegradation")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="PvPlacement" className="col-span-2">Placement (Rooftop/Ground mounted) (RT/GM):</Label>
+                    <Input id="PvPlacement" {...form.register("PvPlacement")} className="col-span-2" />
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Electrical & Battery System</h3>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="BatteryroundtripEfficiency" className="col-span-2">Battery round-trip efficiency (%):</Label>
+                    <Input id="BatteryroundtripEfficiency" {...form.register("BatteryroundtripEfficiency")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="BatteryLife" className="col-span-2">Battery life (Years):</Label>
+                    <Input id="BatteryLife" {...form.register("BatteryLife")} className="col-span-2" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="BatteryCapacityAnnualDegradation" className="col-span-2">Battery capacity annual degradation (%):</Label>
+                    <Input id="BatteryCapacityAnnualDegradation" {...form.register("BatteryCapacityAnnualDegradation")} className="col-span-2" />
+                  </div>
+                </div>
+                
+                <h2 className="text-xl font-semibold mt-6">B. Variables (design knobs to iterate)</h2>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Renewable Generation</h3>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="PV_DC_size_LowerRange" className="col-span-2">PV DC Size (MW<sub>PV-DC</sub>):</Label>
+                    <Input id="PV_DC_size_LowerRange" {...form.register("PV_DC_size_LowerRange")} className="col-span-2" />
+                    <Label htmlFor="PV_DC_size_HigherRange" className="col-span-1 text-center">to</Label>
+                    <Input id="PV_DC_size_HigherRange" {...form.register("PV_DC_size_HigherRange")} className="col-span-1" />
+                  </div>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="inverter_ac_size_low" className="col-span-2">Inverter AC Size (MW<sub>PV-AC</sub>):</Label>
+                    <Input id="inverter_ac_size_low" {...form.register("inverter_ac_size_low")} className="col-span-2" />
+                    <Label htmlFor="inverter_ac_size_high" className="col-span-1 text-center">to</Label>
+                    <Input id="inverter_ac_size_high" {...form.register("inverter_ac_size_high")} className="col-span-1" />
+                  </div>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="wind_size_low" className="col-span-2">Wind Turbine Size (MW<sub>WTG-DC</sub>):</Label>
+                    <Input id="wind_size_low" {...form.register("wind_size_low")} className="col-span-2" />
+                    <Label htmlFor="wind_size_high" className="col-span-1 text-center">to</Label>
+                    <Input id="wind_size_high" {...form.register("wind_size_high")} className="col-span-1" />
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Transmission / Interconnect</h3>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="power_evactuation_size_low" className="col-span-2">Power Evacuation Capacity (MW<sub>AC-Evac</sub>):</Label>
+                    <Input id="power_evactuation_size_low" {...form.register("power_evactuation_size_low")} className="col-span-2" />
+                    <Label htmlFor="power_evactuation_size_high" className="col-span-1 text-center">to</Label>
+                    <Input id="power_evactuation_size_high" {...form.register("power_evactuation_size_high")} className="col-span-1" />
+                  </div>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="ltoa_size_low" className="col-span-2">LTOA Capacity (MW<sub>LTOA</sub>):</Label>
+                    <Input id="ltoa_size_low" {...form.register("ltoa_size_low")} className="col-span-2" />
+                    <Label htmlFor="ltoa_size_high" className="col-span-1 text-center">to</Label>
+                    <Input id="ltoa_size_high" {...form.register("ltoa_size_high")} className="col-span-1" />
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Battery System</h3>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="battery_size_low" className="col-span-2">Battery Energy Capacity (kWh<sub>Bat</sub>):</Label>
+                    <Input id="battery_size_low" {...form.register("battery_size_low")} className="col-span-2" />
+                    <Label htmlFor="battery_size_high" className="col-span-1 text-center">to</Label>
+                    <Input id="battery_size_high" {...form.register("battery_size_high")} className="col-span-1" />
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">Power-to-Hydrogen Conversion</h3>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="electrolyser_size_low" className="col-span-2">Electrolyser Aggregate Capacity (MW<sub>EL-AC</sub>):</Label>
+                    <Input id="electrolyser_size_low" {...form.register("electrolyser_size_low")} className="col-span-2" />
+                    <Label htmlFor="electrolyser_size_high" className="col-span-1 text-center">to</Label>
+                    <Input id="electrolyser_size_high" {...form.register("electrolyser_size_high")} className="col-span-1" />
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">H₂ Storage & Compression</h3>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="low_bar_h2_storage_size_low" className="col-span-2">Low-pressure H₂ Storage (Nm³<sub>H₂-LP</sub>):</Label>
+                    <Input id="low_bar_h2_storage_size_low" {...form.register("low_bar_h2_storage_size_low")} className="col-span-2" />
+                    <Label htmlFor="low_bar_h2_storage_size_high" className="col-span-1 text-center">to</Label>
+                    <Input id="low_bar_h2_storage_size_high" {...form.register("low_bar_h2_storage_size_high")} className="col-span-1" />
+                  </div>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="high_bar_h2_storage_size_low" className="col-span-2">High-pressure H₂ Storage (Nm³<sub>H₂-HP</sub>):</Label>
+                    <Input id="high_bar_h2_storage_size_low" {...form.register("high_bar_h2_storage_size_low")} className="col-span-2" />
+                    <Label htmlFor="high_bar_h2_storage_size_high" className="col-span-1 text-center">to</Label>
+                    <Input id="high_bar_h2_storage_size_high" {...form.register("high_bar_h2_storage_size_high")} className="col-span-1" />
+                  </div>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="h2_compressor_throughput_low" className="col-span-2">H₂ Compressor Throughput (Nm³ h⁻¹<sub>Comp-H₂</sub>):</Label>
+                    <Input id="h2_compressor_throughput_low" {...form.register("h2_compressor_throughput_low")} className="col-span-2" />
+                    <Label htmlFor="h2_compressor_throughput_high" className="col-span-1 text-center">to</Label>
+                    <Input id="h2_compressor_throughput_high" {...form.register("h2_compressor_throughput_high")} className="col-span-1" />
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h3 className="text-lg font-semibold mb-3">O₂ Handling</h3>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="o2_storage_low" className="col-span-2">O₂ Storage (Nm³<sub>O₂-Stor</sub>):</Label>
+                    <Input id="o2_storage_low" {...form.register("o2_storage_low")} className="col-span-2" />
+                    <Label htmlFor="o2_storage_high" className="col-span-1 text-center">to</Label>
+                    <Input id="o2_storage_high" {...form.register("o2_storage_high")} className="col-span-1" />
+                  </div>
+                  <div className="grid grid-cols-6 items-center gap-4">
+                    <Label htmlFor="o2_compressor_throughput_low" className="col-span-2">O₂ Compressor Throughput (Nm³ h⁻¹<sub>Comp-O₂</sub>):</Label>
+                    <Input id="o2_compressor_throughput_low" {...form.register("o2_compressor_throughput_low")} className="col-span-2" />
+                    <Label htmlFor="o2_compressor_throughput_high" className="col-span-1 text-center">to</Label>
+                    <Input id="o2_compressor_throughput_high" {...form.register("o2_compressor_throughput_high")} className="col-span-1" />
+                  </div>
+                </div>
+                
+                <div className="flex justify-between mt-6">
                   <Button 
-                    type="submit" 
-                    className="mt-6 bg-[#1A3721] text-white hover:bg-[#2A4731] hover:text-[#CCFF00] transition-colors duration-200 font-semibold px-8 py-2 rounded-lg" 
-                    disabled={isOptimizing}
+                    onClick={goToPreviousStep} 
+                    variant="outline"
                   >
-                    {isOptimizing ? 'Submitting...' : 'Optimize'}
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={goToNextStep} 
+                    className="flex items-center justify-center gap-2"
+                  >
+                    Continue to Network Editor
+                    <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="results">
-          <div className="space-y-4">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded relative">
-                <strong className="font-bold">Error: </strong>
-                <span className="block sm:inline">{error}</span>
               </div>
-            )}
-
-            {selectedRun ? (
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <CardTitle className="text-xl font-semibold">Run Details</CardTitle>
-                      <CardDescription>
-                        ID: {selectedRun.operation_run_id || 'N/A'}
-                      </CardDescription>
-                    </div>
-                    <Button 
-                      variant="outline"
-                      onClick={() => setSelectedRun(null)}
-                      className="ml-4"
-                    >
-                      Back to List
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-500">Created</h3>
-                        <p className="mt-1 text-sm">{formatDate(selectedRun.created_at)}</p>
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-500">Updated</h3>
-                        <p className="mt-1 text-sm">{formatDate(selectedRun.updated_at)}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Status</h3>
-                      <span className={`mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedRun.status)}`}>
-                        {selectedRun.status}
-                      </span>
-                    </div>
-                    {/* Additional details will be added here when the API is provided */}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="flex justify-center items-center h-full">
-                <p className="text-gray-500">No run selected</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Step 4: Network Editor */}
+      {currentStep === 3 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>GH2 Network Simulation Editor</CardTitle>
+            <CardDescription>Design your hydrogen production network by connecting modules</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-gray-600">
+              Design your hydrogen production network by dragging modules onto the canvas and connecting their input/output ports.
+              Configure module parameters in the properties panel.
+            </p>
+            <div className="h-[600px] border rounded-md mb-6">
+              <NetworkEditor ref={networkEditorRef} onConfigChange={handleNetworkConfigChange} />
+            </div>
+            
+            <div className="flex justify-between mt-6">
+              <Button 
+                onClick={goToPreviousStep} 
+                variant="outline"
+              >
+                Back
+              </Button>
+              <Button 
+                onClick={form.handleSubmit(onSubmit)}
+                disabled={isOptimizing}
+                className="flex items-center justify-center gap-2"
+              >
+                {isOptimizing ? 'Optimizing...' : 'Run Optimization'}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Results display would go here */}
+      {selectedRun && (
+        <div className="mt-6">
+          {/* Results content */}
+        </div>
+      )}
     </div>
   );
 }

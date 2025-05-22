@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { History, Settings, Activity, LogOut } from 'lucide-react'
+import { History, Settings, Activity, Network, LogOut } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { LucideIcon } from 'lucide-react'

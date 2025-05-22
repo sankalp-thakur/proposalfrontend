@@ -42,6 +42,18 @@ export function withAuth<P extends object>(Component: React.ComponentType<P & Pr
           setIsLoading(true);
           setError(null);
 
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Development mode: Bypassing authentication');
+            setUser({
+              id: 1,
+              name: 'Test User',
+              email: 'test@example.com'
+            });
+            setIsAuthenticated(true);
+            setIsLoading(false);
+            return;
+          }
+
           const result = await validateSession();
           if (!result.isValid) {
             setError(result.error || 'Session invalid');

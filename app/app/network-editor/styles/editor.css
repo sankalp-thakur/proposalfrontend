@@ -1,0 +1,157 @@
+.react-flow {
+  background-color: #f8fafc;
+}
+
+.react-flow__node {
+  border-radius: 6px;
+  padding: 0;
+  font-size: 12px;
+  color: #222;
+  text-align: center;
+  border-width: 1px;
+  border-style: solid;
+  width: 200px;
+}
+
+.module-node {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  overflow: hidden;
+}
+
+.module-header {
+  background: #f1f5f9;
+  padding: 8px;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ports-container {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.port {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  position: relative;
+  font-size: 11px;
+}
+
+.input-ports .port {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.output-ports .port {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.port-label {
+  margin: 0 4px;
+}
+
+.port-type {
+  font-size: 9px;
+  color: #666;
+  margin: 0 4px;
+}
+
+.react-flow__handle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #555;
+}
+
+.react-flow__handle-power {
+  background-color: #ff9800;
+}
+
+.react-flow__handle-hydrogen {
+  background-color: #2196f3;
+}
+
+.react-flow__handle-oxygen {
+  background-color: #4caf50;
+}
+
+.react-flow__handle-percentage {
+  background-color: #9c27b0;
+}
+
+.module-sidebar {
+  padding: 15px 10px;
+  border-right: 1px solid #eee;
+  font-size: 12px;
+  background: white;
+}
+
+.module-sidebar .module-item {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 8px;
+  margin-bottom: 8px;
+  cursor: grab;
+  background: white;
+  transition: all 0.2s;
+}
+
+.module-sidebar .module-item:hover {
+  background: #f1f5f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.properties-panel {
+  padding: 15px;
+  border-left: 1px solid #eee;
+  font-size: 12px;
+  background: white;
+  overflow-y: auto;
+}
+
+.properties-panel h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.property-group {
+  margin-bottom: 15px;
+}
+
+.property-group-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.property-item {
+  margin-bottom: 8px;
+}
+
+.property-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: #666;
+}
+
+.property-input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+}

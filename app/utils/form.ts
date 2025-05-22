@@ -2,6 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
 export const optimizationFormSchema = z.object({
+  clientName: z.string().min(1, "Client name is required"),
+  latitude: z.string().min(1, "Latitude is required"),
+  longitude: z.string().min(1, "Longitude is required"),
+  
   client_h2flowrate: z.string().min(0).default('0'),
   client_h2flowhours: z.string().min(0).default('24'),
   projectLifetime: z.string().min(0).default('20'),
