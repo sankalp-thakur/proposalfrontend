@@ -20,6 +20,21 @@ import 'reactflow/dist/style.css';
 import '../styles/editor.css';
 import { toast } from 'react-toastify';
 
+export const getPortColor = (dataType: string): string => {
+  switch (dataType) {
+    case 'power':
+      return '#ff9800';
+    case 'hydrogen':
+      return '#2196f3';
+    case 'oxygen':
+      return '#4caf50';
+    case 'percentage':
+      return '#9c27b0';
+    default:
+      return '#555';
+  }
+};
+
 const ModuleNode = dynamic(() => import('./ModuleNode'), { ssr: false });
 const ModuleSidebar = dynamic(() => import('./ModuleSidebar'), { ssr: false });
 const PropertiesPanel = dynamic(() => import('./PropertiesPanel'), { ssr: false });
@@ -38,7 +53,7 @@ export interface NetworkEditorRef {
   getCurrentFlow: () => any | null;
 }
 
-const defaultReactFlowState = {
+const defaultReactFlowState: { nodes: Node<any>[]; edges: Edge<any>[]; viewport: { x: number; y: number; zoom: number } } = {
   nodes: [
     {
       id: "renewable_energy-1",
@@ -401,21 +416,5 @@ const NetworkEditor = forwardRef<NetworkEditorRef, NetworkEditorProps>(({ onConf
 
 // Add display name for better debugging in React DevTools
 NetworkEditor.displayName = 'NetworkEditor';
-
-// getPortColor function remains unchanged
-export const getPortColor = (dataType: string): string => {
-  switch (dataType) {
-    case 'power':
-      return '#ff9800';
-    case 'hydrogen':
-      return '#2196f3';
-    case 'oxygen':
-      return '#4caf50';
-    case 'percentage':
-      return '#9c27b0';
-    default:
-      return '#555';
-  }
-};
 
 export default NetworkEditor;

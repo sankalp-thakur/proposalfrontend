@@ -1,4 +1,4 @@
-{
+export const networkConfig = {
   "nodes": [
     {
       "id": "renewable_energy-1",
@@ -121,4 +121,4 @@
     }
   ],
   "viewport": { "x": 0, "y": 0, "zoom": 1 }
-}
+};
