@@ -38,6 +38,22 @@ export interface NetworkEditorRef {
   getCurrentFlow: () => any | null;
 }
 
+// Determine the color for a given port data type
+export function getPortColor(dataType: string): string {
+  switch (dataType) {
+    case 'power':
+      return '#ff9800';
+    case 'hydrogen':
+      return '#2196f3';
+    case 'oxygen':
+      return '#4caf50';
+    case 'percentage':
+      return '#9c27b0';
+    default:
+      return '#555';
+  }
+}
+
 const defaultReactFlowState = {
   nodes: [
     {
@@ -401,21 +417,5 @@ const NetworkEditor = forwardRef<NetworkEditorRef, NetworkEditorProps>(({ onConf
 
 // Add display name for better debugging in React DevTools
 NetworkEditor.displayName = 'NetworkEditor';
-
-// getPortColor function remains unchanged
-export const getPortColor = (dataType: string): string => {
-  switch (dataType) {
-    case 'power':
-      return '#ff9800';
-    case 'hydrogen':
-      return '#2196f3';
-    case 'oxygen':
-      return '#4caf50';
-    case 'percentage':
-      return '#9c27b0';
-    default:
-      return '#555';
-  }
-};
 
 export default NetworkEditor;
