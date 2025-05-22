@@ -16,6 +16,7 @@ import { optimizationFormSchema, OptimizationFormValues } from '../utils/form'
 import ProgressBar from '@/components/ProgressBar'
 import ClientDetailsForm from '@/components/ClientDetailsForm'
 import dynamic from 'next/dynamic'
+import { NetworkEditorRef } from './network-editor/components/NetworkEditor';
 
 const NetworkEditor = dynamic(() => import('./network-editor/components/NetworkEditor'), {
   ssr: false,
@@ -45,6 +46,7 @@ function RunOptimizationPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const networkEditorRef = useRef<NetworkEditorRef>(null);
   const [currentStep, setCurrentStep] = useState(0)
   const [networkConfig, setNetworkConfig] = useState<any>(null)
   const steps = ["Client Details", "Financial Model", "Assumptions & Variables", "Network Editor"]
@@ -248,13 +250,25 @@ function RunOptimizationPage() {
     setIsOptimizing(true)
 
     try {
+      let finalNetworkConfig = networkConfig; 
+
+      if (currentStep === steps.indexOf("Network Editor")) { 
+        if (networkEditorRef.current && typeof networkEditorRef.current.getCurrentFlow === 'function') {
+          const currentFlowFromEditor = networkEditorRef.current.getCurrentFlow();
+          if (currentFlowFromEditor) {
+            setNetworkConfig(currentFlowFromEditor); 
+            finalNetworkConfig = currentFlowFromEditor;
+          }
+        }
+      }
+      
       const payload = {
         clientName: processedValues.clientName,
         latitude: processedValues.latitude,
         longitude: processedValues.longitude,
         financialModel: selectedModel,
         Ui_variables: processedValues,
-        networkConfig: networkConfig
+        networkConfig: finalNetworkConfig
       };
 
       const requestBody = JSON.stringify(payload);
@@ -711,7 +725,7 @@ function RunOptimizationPage() {
               Configure module parameters in the properties panel.
             </p>
             <div className="h-[600px] border rounded-md mb-6">
-              <NetworkEditor onConfigChange={handleNetworkConfigChange} />
+              <NetworkEditor ref={networkEditorRef} onConfigChange={handleNetworkConfigChange} />
             </div>
             
             <div className="flex justify-between mt-6">

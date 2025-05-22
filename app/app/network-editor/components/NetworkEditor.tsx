@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import dynamic from 'next/dynamic';
 import ReactFlow, {
   ReactFlowProvider,
@@ -33,12 +33,25 @@ interface NetworkEditorProps {
   onConfigChange?: (config: any) => void;
 }
 
-const NetworkEditor: React.FC<NetworkEditorProps> = ({ onConfigChange }) => {
+export interface NetworkEditorRef {
+  getCurrentFlow: () => any | null;
+}
+
+const NetworkEditor = forwardRef<NetworkEditorRef, NetworkEditorProps>(({ onConfigChange }, ref) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [selectedElement, setSelectedElement] = useState<Node | Edge | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    getCurrentFlow: () => {
+      if (reactFlowInstance) {
+        return reactFlowInstance.toObject();
+      }
+      return null;
+    }
+  }));
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -230,7 +243,10 @@ const NetworkEditor: React.FC<NetworkEditorProps> = ({ onConfigChange }) => {
       />
     </div>
   );
-};
+});
+
+// Add display name for better debugging in React DevTools
+NetworkEditor.displayName = 'NetworkEditor';
 
 export const getPortColor = (dataType: string): string => {
   switch (dataType) {
